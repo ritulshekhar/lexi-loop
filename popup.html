@@ -3,58 +3,90 @@
 
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>LexiLoop</title>
+
     <link rel="stylesheet" href="popup.css">
 </head>
 
 <body>
+
     <main class="app">
 
         <header class="header">
+
             <div>
-                <div class="brand">LexiLoop</div>
+                <div class="brand">
+                    LexiLoop
+                </div>
+
                 <div class="subtitle">
                     Your daily vocabulary loop
                 </div>
             </div>
 
             <div class="date" id="date"></div>
+
         </header>
 
-        <section class="summary-card">
-            <div class="summary-item">
-                <span class="summary-value" id="new-count">
+        <section class="stats-card">
+
+            <div class="stat">
+                <span class="stat-value" id="new-count">
                     0/3
                 </span>
-                <span class="summary-label">
+
+                <span class="stat-label">
                     new words
                 </span>
             </div>
 
-            <div class="summary-divider"></div>
+            <div class="stat-divider"></div>
 
-            <div class="summary-item">
-                <span class="summary-value" id="due-count">
+            <div class="stat">
+                <span class="stat-value" id="due-count">
                     0
                 </span>
-                <span class="summary-label">
-                    due for revision
+
+                <span class="stat-label">
+                    due today
                 </span>
             </div>
+
+            <div class="stat-divider"></div>
+
+            <div class="stat">
+                <span class="stat-value" id="mastery-score">
+                    —
+                </span>
+
+                <span class="stat-label">
+                    avg. mastery
+                </span>
+            </div>
+
         </section>
 
         <section class="progress-section">
+
             <div class="progress-top">
-                <span>Today's progress</span>
+                <span>
+                    Today's progress
+                </span>
+
                 <span id="progress-text">
                     0/3 new words
                 </span>
             </div>
 
             <div class="progress-track">
+
                 <div class="progress-bar" id="progress-bar"></div>
+
             </div>
+
         </section>
 
         <section id="completion-message" class="completion-message hidden">
@@ -62,10 +94,12 @@
         </section>
 
         <section id="revision-section" class="section hidden">
+
             <div class="section-heading">
+
                 <div>
                     <span class="section-label">
-                        REVISION
+                        PERSONALIZED REVISION
                     </span>
 
                     <h2>
@@ -76,14 +110,19 @@
                 <span class="section-count" id="revision-count">
                     0
                 </span>
+
             </div>
 
             <div id="revision-container" class="revision-container"></div>
+
         </section>
 
         <section class="section">
+
             <div class="section-heading">
+
                 <div>
+
                     <span class="section-label">
                         NEW WORDS
                     </span>
@@ -91,22 +130,24 @@
                     <h2>
                         Today's vocabulary
                     </h2>
+
                 </div>
+
             </div>
 
             <div id="words-container" class="words-container"></div>
+
         </section>
 
         <footer class="footer">
-            <span>
-                3 words a day • Build vocabulary that sticks
-            </span>
+            3 words a day • Build vocabulary that sticks
         </footer>
 
     </main>
 
     <script src="words.js"></script>
     <script src="popup.js"></script>
+
 </body>
 
 </html>

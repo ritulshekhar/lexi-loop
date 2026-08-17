@@ -4,14 +4,16 @@
 
 body {
     margin: 0;
-    width: 430px;
+    width: 440px;
     min-height: 600px;
+
     font-family:
         Inter,
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
         sans-serif;
+
     background: #f7f7f4;
     color: #242424;
 }
@@ -24,6 +26,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+
     gap: 16px;
     margin-bottom: 20px;
 }
@@ -31,11 +34,13 @@ body {
 .brand {
     font-size: 25px;
     font-weight: 700;
+
     letter-spacing: -0.5px;
 }
 
 .subtitle {
     margin-top: 4px;
+
     font-size: 12px;
     color: #777;
 }
@@ -43,43 +48,58 @@ body {
 .date {
     font-size: 11px;
     color: #777;
+
     text-align: right;
     line-height: 1.4;
 }
 
-.summary-card {
+.stats-card {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+
+    grid-template-columns:
+        1fr auto 1fr auto 1fr;
+
     align-items: center;
+
     margin-bottom: 18px;
     padding: 14px;
-    border: 1px solid #deded8;
+
+    border:
+        1px solid #deded8;
+
     border-radius: 14px;
-    background: #fff;
+
+    background: #ffffff;
 }
 
-.summary-item {
+.stat {
     display: flex;
     flex-direction: column;
+
     gap: 3px;
+
     text-align: center;
 }
 
-.summary-value {
-    font-size: 18px;
+.stat-value {
+    font-size: 17px;
     font-weight: 700;
 }
 
-.summary-label {
-    font-size: 9px;
+.stat-label {
+    font-size: 8px;
+
     color: #888;
+
     text-transform: uppercase;
+
     letter-spacing: 0.6px;
 }
 
-.summary-divider {
+.stat-divider {
     width: 1px;
     height: 28px;
+
     background: #e2e2dc;
 }
 
@@ -89,8 +109,11 @@ body {
 
 .progress-top {
     display: flex;
+
     justify-content: space-between;
+
     margin-bottom: 8px;
+
     font-size: 12px;
     color: #666;
 }
@@ -98,25 +121,38 @@ body {
 .progress-track {
     width: 100%;
     height: 6px;
+
     overflow: hidden;
+
     background: #e6e6e1;
+
     border-radius: 999px;
 }
 
 .progress-bar {
     width: 0%;
     height: 100%;
+
     background: #363636;
+
     border-radius: 999px;
-    transition: width 0.25s ease;
+
+    transition:
+        width 0.25s ease;
 }
 
 .completion-message {
     margin-bottom: 18px;
+
     padding: 11px 13px;
-    border: 1px solid #d9d9d2;
+
+    border:
+        1px solid #d9d9d2;
+
     border-radius: 12px;
+
     background: #efefe9;
+
     font-size: 12px;
     color: #4f4f4b;
 }
@@ -131,158 +167,231 @@ body {
 
 .section-heading {
     display: flex;
+
     justify-content: space-between;
     align-items: flex-end;
+
     margin-bottom: 10px;
 }
 
 .section-label {
     font-size: 9px;
+
     font-weight: 700;
+
     letter-spacing: 1px;
+
     color: #94948c;
 }
 
 .section-heading h2 {
     margin: 3px 0 0;
+
     font-size: 17px;
+
     letter-spacing: -0.2px;
 }
 
 .section-count {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
+
     min-width: 25px;
     height: 25px;
+
     padding: 0 8px;
+
     border-radius: 999px;
+
     background: #ecece7;
+
     font-size: 11px;
+
     font-weight: 700;
+
     color: #5d5d57;
 }
 
 .words-container,
 .revision-container {
     display: flex;
+
     flex-direction: column;
+
     gap: 14px;
 }
 
 .word-card,
 .revision-card {
     padding: 17px;
-    border: 1px solid #deded8;
+
+    border:
+        1px solid #deded8;
+
     border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.035);
+
+    background: #ffffff;
+
+    box-shadow:
+        0 5px 18px rgba(0, 0, 0, 0.035);
 }
 
 .word-card.learned {
     border-color: #c9c9c1;
+
     background: #fafaf7;
 }
 
 .word-header {
     display: flex;
+
     justify-content: space-between;
     align-items: flex-start;
+
     gap: 12px;
 }
 
 .word-title {
     margin: 0;
+
     font-size: 24px;
+
     font-weight: 700;
+
     letter-spacing: -0.4px;
 }
 
 .pronunciation {
     margin-top: 4px;
+
     font-size: 11px;
+
     color: #888;
 }
 
 .part-of-speech {
     display: inline-block;
+
     margin-top: 7px;
+
     padding: 4px 8px;
+
     border-radius: 999px;
+
     background: #f0f0eb;
+
     font-size: 10px;
+
     font-weight: 600;
+
     color: #696963;
+
     text-transform: uppercase;
+
     letter-spacing: 0.5px;
 }
 
 .meaning {
     margin: 14px 0;
+
     font-size: 13px;
+
     line-height: 1.55;
+
     color: #444;
 }
 
 .word-relations {
     display: grid;
+
     grid-template-columns: 1fr 1fr;
+
     gap: 8px;
+
     margin-bottom: 14px;
 }
 
 .relation {
     padding: 10px;
+
     border-radius: 11px;
+
     background: #f6f6f2;
 }
 
 .relation-label {
     display: block;
+
     margin-bottom: 3px;
+
     font-size: 9px;
+
     text-transform: uppercase;
+
     letter-spacing: 0.7px;
+
     color: #8a8a82;
 }
 
 .relation-value {
     font-size: 12px;
+
     font-weight: 600;
 }
 
 .examples-title {
     margin-bottom: 8px;
+
     font-size: 10px;
+
     font-weight: 700;
+
     color: #777;
+
     text-transform: uppercase;
+
     letter-spacing: 0.7px;
 }
 
 .examples {
     margin: 0;
+
     padding-left: 17px;
 }
 
 .examples li {
     margin-bottom: 7px;
+
     font-size: 11.5px;
+
     line-height: 1.5;
+
     color: #555;
 }
 
 .learn-button,
 .show-answer-button {
     width: 100%;
+
     margin-top: 14px;
+
     padding: 10px 12px;
-    border: 1px solid #2f2f2f;
+
+    border:
+        1px solid #2f2f2f;
+
     border-radius: 10px;
+
     background: #2f2f2f;
-    color: #fff;
+
+    color: #ffffff;
+
     font-size: 11px;
+
     font-weight: 600;
+
     cursor: pointer;
 }
 
@@ -293,8 +402,11 @@ body {
 
 .learn-button.learned {
     border-color: #d1d1ca;
+
     background: #ecece6;
+
     color: #555;
+
     cursor: default;
 }
 
@@ -304,40 +416,105 @@ body {
 
 .revision-header {
     display: flex;
+
     justify-content: space-between;
     align-items: center;
+
     gap: 10px;
 }
 
 .revision-word {
     margin: 0;
+
     font-size: 20px;
+
     font-weight: 700;
+}
+
+.revision-meta {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
 }
 
 .revision-status {
     padding: 5px 8px;
+
     border-radius: 999px;
+
     background: #eeeeea;
+
     font-size: 9px;
+
     font-weight: 700;
+
     color: #777;
+
     text-transform: uppercase;
+
     letter-spacing: 0.6px;
+}
+
+.mastery-score {
+    padding: 5px 8px;
+
+    border-radius: 999px;
+
+    background: #f0f0eb;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    color: #666;
+}
+
+.mastery-track {
+    width: 100%;
+    height: 5px;
+
+    margin-top: 11px;
+
+    overflow: hidden;
+
+    border-radius: 999px;
+
+    background: #e4e4de;
+}
+
+.mastery-fill {
+    width: 0%;
+    height: 100%;
+
+    border-radius: 999px;
+
+    background: #595959;
+
+    transition:
+        width 0.25s ease;
 }
 
 .revision-prompt {
     margin: 13px 0 10px;
+
     font-size: 13px;
+
     line-height: 1.5;
+
     color: #4a4a46;
 }
 
 .answer-box {
     display: none;
+
     margin-top: 12px;
+
     padding: 12px;
+
     border-radius: 11px;
+
     background: #f0f0eb;
 }
 
@@ -347,21 +524,30 @@ body {
 
 .answer-meaning {
     margin: 0 0 8px;
+
     font-size: 12px;
+
     line-height: 1.5;
+
     color: #444;
 }
 
 .answer-detail {
     margin-top: 5px;
+
     font-size: 11px;
+
     color: #666;
 }
 
 .revision-actions {
     display: none;
-    grid-template-columns: 1fr 1fr 1fr;
+
+    grid-template-columns:
+        1fr 1fr 1fr;
+
     gap: 7px;
+
     margin-top: 12px;
 }
 
@@ -371,12 +557,20 @@ body {
 
 .revision-button {
     padding: 9px 6px;
-    border: 1px solid #d7d7d0;
+
+    border:
+        1px solid #d7d7d0;
+
     border-radius: 9px;
-    background: #fff;
+
+    background: #ffffff;
+
     color: #555;
+
     font-size: 10px;
+
     font-weight: 600;
+
     cursor: pointer;
 }
 
@@ -386,9 +580,15 @@ body {
 
 .footer {
     margin-top: 18px;
+
     padding-top: 14px;
-    border-top: 1px solid #e3e3de;
+
+    border-top:
+        1px solid #e3e3de;
+
     font-size: 10px;
+
     color: #8a8a83;
+
     text-align: center;
 }

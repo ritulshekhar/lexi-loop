@@ -1,14 +1,14 @@
 # LexiLoop
 
-LexiLoop is a Chrome extension designed to help users build practical English vocabulary through daily learning, spaced repetition, and contextual browser reminders.
+LexiLoop is a Chrome extension designed to help users build practical English vocabulary through daily learning, spaced repetition, adaptive revision, and contextual browser reminders.
 
-## V0.3 Features
+## V0.4 Features
 
-V0.3 introduces Chrome-wide interaction.
+V0.4 introduces personalized learning.
 
 ### Daily vocabulary
 
-- Three new words every day
+- Three new words per day
 - Meaning
 - Pronunciation
 - Part of speech
@@ -16,61 +16,79 @@ V0.3 introduces Chrome-wide interaction.
 - Antonym
 - Four example sentences
 
-### Spaced repetition
+### Adaptive mastery score
 
-Words are scheduled for revision using:
+Every learned word receives a mastery score from:
+
+0 to 100
+
+The score changes according to revision performance.
+
+- Hard: score decreases
+- Good: score increases moderately
+- Easy: score increases faster
+
+### Adaptive revision intervals
+
+Revision intervals now adapt according to performance.
+
+Possible intervals include:
 
 - 1 day
 - 3 days
 - 7 days
 - 14 days
 - 30 days
+- 45 days
 
-The interval changes depending on revision performance.
+Hard words return sooner.
 
-### Browser notifications
+Words that are consistently easy move further apart.
 
-LexiLoop can notify the user when:
+### Personalized revision priority
 
-- A new daily vocabulary session is available
-- Words are due for revision
+When multiple words are due, LexiLoop prioritizes words with lower mastery scores.
 
-The notification system avoids repeatedly notifying the user during the same day.
+This means words the user struggles with are shown before words they already know well.
 
-### Contextual browser revision
+### Mastery levels
 
-When a learned word becomes due, LexiLoop can display a small revision card while browsing normal websites.
+Words move through:
 
-The revision card asks:
+- New
+- Learning
+- Familiar
+- Mastered
 
-> Do you remember what this means?
+### Average mastery
 
-The user can:
+The popup displays the user's average mastery score across learned vocabulary.
 
-- Show the answer
-- Open LexiLoop
-- Dismiss the reminder
+### Contextual browser reminders
 
-### Reminder protection
+V0.3 browser reminders continue to work.
 
-The browser reminder is intentionally limited.
+The contextual revision system now prioritizes the user's weakest due words.
 
-It does not appear continuously.
+## Learning model
 
-The current cooldown is 30 minutes.
-
-The user can also dismiss contextual reminders for the rest of the current day.
-
-## Project Structure
+The basic adaptive flow is:
 
 ```text
-LexiLoop/
-├── manifest.json
-├── background.js
-├── popup.html
-├── popup.css
-├── popup.js
-├── content.js
-├── content.css
-├── words.js
-└── README.md
+New
+ ↓
+Learned
+ ↓
+Revision
+ ↓
+Performance recorded
+ ↓
+Mastery score updated
+ ↓
+Next interval adjusted
+ ↓
+Repeated revision
+ ↓
+Familiar
+ ↓
+Mastered

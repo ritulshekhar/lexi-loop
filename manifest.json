@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "LexiLoop",
-    "version": "0.3.0",
-    "description": "Build practical English vocabulary with daily learning, spaced repetition, and contextual browser reminders.",
+    "version": "0.4.0",
+    "description": "Build practical English vocabulary with adaptive learning and personalized spaced repetition.",
     "permissions": [
         "storage",
         "alarms",
@@ -24,6 +24,7 @@
                 "<all_urls>"
             ],
             "js": [
+                "words.js",
                 "content.js"
             ],
             "css": [

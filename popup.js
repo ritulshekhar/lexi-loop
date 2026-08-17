@@ -1,4 +1,11 @@
-const REVISION_INTERVALS = [1, 3, 7, 14, 30];
+const REVISION_INTERVALS = [
+    1,
+    3,
+    7,
+    14,
+    30,
+    45
+];
 
 const STORAGE_KEYS = {
     dailyData: "dailyData",
@@ -6,30 +13,42 @@ const STORAGE_KEYS = {
 };
 
 function getDateKey(date = new Date()) {
-    const year = date.getFullYear();
-    const month = String(
-        date.getMonth() + 1
-    ).padStart(2, "0");
-    const day = String(
-        date.getDate()
-    ).padStart(2, "0");
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
 }
 
 function getFormattedDate() {
-    return new Intl.DateTimeFormat("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-    }).format(new Date());
+    return new Intl.DateTimeFormat(
+        "en-US",
+        {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    ).format(new Date());
 }
 
-function addDays(dateKey, days) {
-    const date = new Date(
-        `${dateKey}T00:00:00`
-    );
+function addDays(
+    dateKey,
+    days
+) {
+    const date =
+        new Date(
+            `${dateKey}T00:00:00`
+        );
 
     date.setDate(
         date.getDate() + days
@@ -39,13 +58,15 @@ function addDays(dateKey, days) {
 }
 
 function getDayNumber() {
-    const now = new Date();
+    const now =
+        new Date();
 
-    const startOfYear = new Date(
-        now.getFullYear(),
-        0,
-        0
-    );
+    const startOfYear =
+        new Date(
+            now.getFullYear(),
+            0,
+            0
+        );
 
     const diff =
         now -
@@ -70,33 +91,51 @@ async function getWordProgress() {
         ]);
 
     return (
-        result[STORAGE_KEYS.wordProgress] ||
-        {}
+        result[
+        STORAGE_KEYS.wordProgress
+        ] || {}
     );
 }
 
-async function saveWordProgress(progress) {
+async function saveWordProgress(
+    progress
+) {
     await chrome.storage.local.set({
         [STORAGE_KEYS.wordProgress]:
             progress
     });
 }
 
-function createDefaultProgress(word) {
+function createDefaultProgress(
+    word
+) {
     return {
         word: word.word,
+
         status: "new",
+
+        masteryScore: 0,
+
         intervalIndex: 0,
+
         dueDate: null,
+
         totalReviews: 0,
+
         correctReviews: 0,
+
         lastReviewed: null
     };
 }
 
-function selectNewWords(progress) {
-    const totalWords = WORDS.length;
-    const dayNumber = getDayNumber();
+function selectNewWords(
+    progress
+) {
+    const totalWords =
+        WORDS.length;
+
+    const dayNumber =
+        getDayNumber();
 
     const startIndex =
         (dayNumber * 3) %
@@ -110,17 +149,24 @@ function selectNewWords(progress) {
         offset++
     ) {
         const index =
-            (startIndex + offset) %
+            (
+                startIndex +
+                offset
+            ) %
             totalWords;
 
         const word =
             WORDS[index];
 
-        if (!progress[word.word]) {
+        if (
+            !progress[word.word]
+        ) {
             selected.push(word);
         }
 
-        if (selected.length === 3) {
+        if (
+            selected.length === 3
+        ) {
             break;
         }
     }
@@ -128,8 +174,11 @@ function selectNewWords(progress) {
     return selected;
 }
 
-async function getDailyData(progress) {
-    const today = getDateKey();
+async function getDailyData(
+    progress
+) {
+    const today =
+        getDateKey();
 
     const result =
         await chrome.storage.local.get([
@@ -137,7 +186,9 @@ async function getDailyData(progress) {
         ]);
 
     const storedData =
-        result[STORAGE_KEYS.dailyData];
+        result[
+        STORAGE_KEYS.dailyData
+        ];
 
     if (
         storedData &&
@@ -147,16 +198,20 @@ async function getDailyData(progress) {
     }
 
     const newWords =
-        selectNewWords(progress);
+        selectNewWords(
+            progress
+        );
 
     const dailyData = {
         date: today,
-        words: newWords.map(
-            (word) => ({
-                word: word.word,
-                learned: false
-            })
-        )
+
+        words:
+            newWords.map(
+                (word) => ({
+                    word: word.word,
+                    learned: false
+                })
+            )
     };
 
     await chrome.storage.local.set({
@@ -167,6 +222,76 @@ async function getDailyData(progress) {
     return dailyData;
 }
 
+function getMasteryLabel(
+    score
+) {
+    if (score >= 85) {
+        return "Mastered";
+    }
+
+    if (score >= 60) {
+        return "Familiar";
+    }
+
+    if (score > 0) {
+        return "Learning";
+    }
+
+    return "New";
+}
+
+function getNextIntervalIndex(
+    progress,
+    result
+) {
+    let index =
+        progress.intervalIndex;
+
+    if (result === "hard") {
+        return Math.max(
+            0,
+            index - 1
+        );
+    }
+
+    if (result === "good") {
+        return Math.min(
+            REVISION_INTERVALS.length - 1,
+            index + 1
+        );
+    }
+
+    return Math.min(
+        REVISION_INTERVALS.length - 1,
+        index + 2
+    );
+}
+
+function updateMasteryScore(
+    progress,
+    result
+) {
+    let score =
+        progress.masteryScore || 0;
+
+    if (result === "hard") {
+        score -= 15;
+    }
+
+    if (result === "good") {
+        score += 10;
+    }
+
+    if (result === "easy") {
+        score += 20;
+    }
+
+    return Math.max(
+        0,
+        Math.min(100, score)
+    );
+}
+
 function createWordCard(
     word,
     savedWord,
@@ -174,7 +299,9 @@ function createWordCard(
     dailyData
 ) {
     const card =
-        document.createElement("article");
+        document.createElement(
+            "article"
+        );
 
     card.className =
         `word-card${savedWord.learned
@@ -183,16 +310,22 @@ function createWordCard(
         }`;
 
     const header =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     header.className =
         "word-header";
 
     const titleBlock =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     const title =
-        document.createElement("h2");
+        document.createElement(
+            "h2"
+        );
 
     title.className =
         "word-title";
@@ -201,7 +334,9 @@ function createWordCard(
         word.word;
 
     const pronunciation =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     pronunciation.className =
         "pronunciation";
@@ -210,7 +345,9 @@ function createWordCard(
         word.pronunciation;
 
     const partOfSpeech =
-        document.createElement("span");
+        document.createElement(
+            "span"
+        );
 
     partOfSpeech.className =
         "part-of-speech";
@@ -218,10 +355,14 @@ function createWordCard(
     partOfSpeech.textContent =
         word.partOfSpeech;
 
-    titleBlock.appendChild(title);
+    titleBlock.appendChild(
+        title
+    );
+
     titleBlock.appendChild(
         pronunciation
     );
+
     titleBlock.appendChild(
         partOfSpeech
     );
@@ -231,7 +372,9 @@ function createWordCard(
     );
 
     const meaning =
-        document.createElement("p");
+        document.createElement(
+            "p"
+        );
 
     meaning.className =
         "meaning";
@@ -240,13 +383,17 @@ function createWordCard(
         word.meaning;
 
     const relations =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     relations.className =
         "word-relations";
 
     const synonym =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     synonym.className =
         "relation";
@@ -255,6 +402,7 @@ function createWordCard(
     <span class="relation-label">
       Synonym
     </span>
+
     <span class="relation-value"></span>
   `;
 
@@ -264,7 +412,9 @@ function createWordCard(
         word.synonym;
 
     const antonym =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     antonym.className =
         "relation";
@@ -273,6 +423,7 @@ function createWordCard(
     <span class="relation-label">
       Antonym
     </span>
+
     <span class="relation-value"></span>
   `;
 
@@ -290,7 +441,9 @@ function createWordCard(
     );
 
     const examplesTitle =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     examplesTitle.className =
         "examples-title";
@@ -299,7 +452,9 @@ function createWordCard(
         "Examples";
 
     const examplesList =
-        document.createElement("ol");
+        document.createElement(
+            "ol"
+        );
 
     examplesList.className =
         "examples";
@@ -307,7 +462,9 @@ function createWordCard(
     word.examples.forEach(
         (example) => {
             const item =
-                document.createElement("li");
+                document.createElement(
+                    "li"
+                );
 
             item.textContent =
                 example;
@@ -319,7 +476,9 @@ function createWordCard(
     );
 
     const button =
-        document.createElement("button");
+        document.createElement(
+            "button"
+        );
 
     button.className =
         "learn-button";
@@ -329,7 +488,9 @@ function createWordCard(
             ? "Learned ✓"
             : "Mark as Learned";
 
-    if (savedWord.learned) {
+    if (
+        savedWord.learned
+    ) {
         button.classList.add(
             "learned"
         );
@@ -351,8 +512,18 @@ function createWordCard(
                         );
                 }
 
-                progress[word.word].status =
+                progress[word.word]
+                    .status =
                     "learning";
+
+                progress[word.word]
+                    .masteryScore =
+                    Math.max(
+                        10,
+                        progress[
+                            word.word
+                        ].masteryScore || 0
+                    );
 
                 progress[word.word]
                     .intervalIndex = 0;
@@ -361,7 +532,7 @@ function createWordCard(
                     .dueDate =
                     addDays(
                         getDateKey(),
-                        REVISION_INTERVALS[0]
+                        1
                     );
 
                 progress[word.word]
@@ -385,16 +556,29 @@ function createWordCard(
         );
     }
 
-    card.appendChild(header);
-    card.appendChild(meaning);
-    card.appendChild(relations);
+    card.appendChild(
+        header
+    );
+
+    card.appendChild(
+        meaning
+    );
+
+    card.appendChild(
+        relations
+    );
+
     card.appendChild(
         examplesTitle
     );
+
     card.appendChild(
         examplesList
     );
-    card.appendChild(button);
+
+    card.appendChild(
+        button
+    );
 
     return card;
 }
@@ -405,19 +589,25 @@ function createRevisionCard(
     onCompleted
 ) {
     const card =
-        document.createElement("article");
+        document.createElement(
+            "article"
+        );
 
     card.className =
         "revision-card";
 
     const header =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     header.className =
         "revision-header";
 
     const title =
-        document.createElement("h3");
+        document.createElement(
+            "h3"
+        );
 
     title.className =
         "revision-word";
@@ -425,34 +615,81 @@ function createRevisionCard(
     title.textContent =
         word.word;
 
+    const meta =
+        document.createElement(
+            "div"
+        );
+
+    meta.className =
+        "revision-meta";
+
     const status =
-        document.createElement("span");
+        document.createElement(
+            "span"
+        );
 
     status.className =
         "revision-status";
 
-    if (
-        progress.status ===
-        "mastered"
-    ) {
-        status.textContent =
-            "Mastered";
-    } else if (
-        progress.status ===
-        "familiar"
-    ) {
-        status.textContent =
-            "Familiar";
-    } else {
-        status.textContent =
-            "Learning";
-    }
+    status.textContent =
+        getMasteryLabel(
+            progress.masteryScore || 0
+        );
 
-    header.appendChild(title);
-    header.appendChild(status);
+    const mastery =
+        document.createElement(
+            "span"
+        );
+
+    mastery.className =
+        "mastery-score";
+
+    mastery.textContent =
+        `${progress.masteryScore || 0}%`;
+
+    meta.appendChild(
+        status
+    );
+
+    meta.appendChild(
+        mastery
+    );
+
+    header.appendChild(
+        title
+    );
+
+    header.appendChild(
+        meta
+    );
+
+    const masteryTrack =
+        document.createElement(
+            "div"
+        );
+
+    masteryTrack.className =
+        "mastery-track";
+
+    const masteryFill =
+        document.createElement(
+            "div"
+        );
+
+    masteryFill.className =
+        "mastery-fill";
+
+    masteryFill.style.width =
+        `${progress.masteryScore || 0}%`;
+
+    masteryTrack.appendChild(
+        masteryFill
+    );
 
     const prompt =
-        document.createElement("p");
+        document.createElement(
+            "p"
+        );
 
     prompt.className =
         "revision-prompt";
@@ -472,7 +709,9 @@ function createRevisionCard(
         "Show Answer";
 
     const answerBox =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     answerBox.className =
         "answer-box";
@@ -507,7 +746,9 @@ function createRevisionCard(
         word.antonym;
 
     const actions =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     actions.className =
         "revision-actions";
@@ -593,75 +834,46 @@ function createRevisionCard(
         item.lastReviewed =
             getDateKey();
 
+        item.masteryScore =
+            updateMasteryScore(
+                item,
+                result
+            );
+
+        item.intervalIndex =
+            getNextIntervalIndex(
+                item,
+                result
+            );
+
         if (
             result === "hard"
         ) {
-            item.intervalIndex =
-                Math.max(
-                    0,
-                    item.intervalIndex - 1
-                );
-
             item.dueDate =
                 addDays(
                     getDateKey(),
                     1
                 );
+        } else {
+            item.dueDate =
+                addDays(
+                    getDateKey(),
+                    REVISION_INTERVALS[
+                    item.intervalIndex
+                    ]
+                );
+        }
 
+        item.status =
+            getMasteryLabel(
+                item.masteryScore
+            ).toLowerCase();
+
+        if (
+            result === "hard"
+        ) {
             item.status =
                 "learning";
-        }
-
-        if (
-            result === "good"
-        ) {
-            item.correctReviews +=
-                1;
-
-            item.intervalIndex =
-                Math.min(
-                    item.intervalIndex + 1,
-                    REVISION_INTERVALS.length - 1
-                );
-
-            item.dueDate =
-                addDays(
-                    getDateKey(),
-                    REVISION_INTERVALS[
-                    item.intervalIndex
-                    ]
-                );
-
-            item.status =
-                item.intervalIndex >= 3
-                    ? "familiar"
-                    : "learning";
-        }
-
-        if (
-            result === "easy"
-        ) {
-            item.correctReviews +=
-                1;
-
-            item.intervalIndex =
-                Math.min(
-                    item.intervalIndex + 2,
-                    REVISION_INTERVALS.length - 1
-                );
-
-            item.dueDate =
-                addDays(
-                    getDateKey(),
-                    REVISION_INTERVALS[
-                    item.intervalIndex
-                    ]
-                );
-
-            item.status =
-                item.intervalIndex >= 4
-                    ? "mastered"
-                    : "familiar";
         }
 
         await saveWordProgress(
@@ -674,31 +886,53 @@ function createRevisionCard(
     hardButton.addEventListener(
         "click",
         () => {
-            completeReview("hard");
+            completeReview(
+                "hard"
+            );
         }
     );
 
     goodButton.addEventListener(
         "click",
         () => {
-            completeReview("good");
+            completeReview(
+                "good"
+            );
         }
     );
 
     easyButton.addEventListener(
         "click",
         () => {
-            completeReview("easy");
+            completeReview(
+                "easy"
+            );
         }
     );
 
-    card.appendChild(header);
-    card.appendChild(prompt);
+    card.appendChild(
+        header
+    );
+
+    card.appendChild(
+        masteryTrack
+    );
+
+    card.appendChild(
+        prompt
+    );
+
     card.appendChild(
         showAnswerButton
     );
-    card.appendChild(answerBox);
-    card.appendChild(actions);
+
+    card.appendChild(
+        answerBox
+    );
+
+    card.appendChild(
+        actions
+    );
 
     return card;
 }
@@ -709,22 +943,64 @@ async function getDueWords(
     const today =
         getDateKey();
 
-    return WORDS.filter(
-        (word) => {
-            const item =
-                progress[word.word];
+    return WORDS
+        .filter(
+            (word) => {
+                const item =
+                    progress[word.word];
 
-            if (
-                !item ||
-                !item.dueDate
-            ) {
-                return false;
+                return (
+                    item &&
+                    item.dueDate &&
+                    item.dueDate <= today
+                );
             }
+        )
+        .sort(
+            (a, b) => {
+                const aScore =
+                    progress[a.word]
+                        .masteryScore || 0;
 
-            return (
-                item.dueDate <= today
+                const bScore =
+                    progress[b.word]
+                        .masteryScore || 0;
+
+                return (
+                    aScore -
+                    bScore
+                );
+            }
+        );
+}
+
+function calculateAverageMastery(
+    progress
+) {
+    const values =
+        Object.values(
+            progress
+        )
+            .map(
+                (item) =>
+                    item.masteryScore || 0
             );
-        }
+
+    if (
+        values.length === 0
+    ) {
+        return null;
+    }
+
+    const total =
+        values.reduce(
+            (sum, value) =>
+                sum + value,
+            0
+        );
+
+    return Math.round(
+        total / values.length
     );
 }
 
@@ -751,7 +1027,8 @@ async function renderRevisions(
             progress
         );
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
     count.textContent =
         dueWords.length;
@@ -792,11 +1069,13 @@ async function renderRevisions(
 
 function updateProgress(
     dailyData,
-    revisionCount
+    revisionCount,
+    progress
 ) {
     const learnedCount =
         dailyData.words.filter(
-            (item) => item.learned
+            (item) =>
+                item.learned
         ).length;
 
     const progressText =
@@ -824,11 +1103,26 @@ function updateProgress(
             "due-count"
         );
 
+    const masteryScore =
+        document.getElementById(
+            "mastery-score"
+        );
+
+    const average =
+        calculateAverageMastery(
+            progress
+        );
+
     newCount.textContent =
         `${learnedCount}/3`;
 
     dueCount.textContent =
         revisionCount;
+
+    masteryScore.textContent =
+        average === null
+            ? "—"
+            : `${average}%`;
 
     progressText.textContent =
         `${learnedCount}/3 new words`;
@@ -893,7 +1187,8 @@ async function render() {
 
     updateProgress(
         dailyData,
-        dueCount
+        dueCount,
+        progress
     );
 }
 
