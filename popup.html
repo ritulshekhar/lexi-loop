@@ -14,16 +14,42 @@
         <header class="header">
             <div>
                 <div class="brand">LexiLoop</div>
-                <div class="subtitle">Your daily vocabulary loop</div>
+                <div class="subtitle">
+                    Your daily vocabulary loop
+                </div>
             </div>
 
             <div class="date" id="date"></div>
         </header>
 
+        <section class="summary-card">
+            <div class="summary-item">
+                <span class="summary-value" id="new-count">
+                    0/3
+                </span>
+                <span class="summary-label">
+                    new words
+                </span>
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-item">
+                <span class="summary-value" id="due-count">
+                    0
+                </span>
+                <span class="summary-label">
+                    due for revision
+                </span>
+            </div>
+        </section>
+
         <section class="progress-section">
             <div class="progress-top">
                 <span>Today's progress</span>
-                <span id="progress-text">0/3 new words</span>
+                <span id="progress-text">
+                    0/3 new words
+                </span>
             </div>
 
             <div class="progress-track">
@@ -38,11 +64,18 @@
         <section id="revision-section" class="section hidden">
             <div class="section-heading">
                 <div>
-                    <span class="section-label">REVISION</span>
-                    <h2>Words due today</h2>
+                    <span class="section-label">
+                        REVISION
+                    </span>
+
+                    <h2>
+                        Words due today
+                    </h2>
                 </div>
 
-                <span class="section-count" id="revision-count">0</span>
+                <span class="section-count" id="revision-count">
+                    0
+                </span>
             </div>
 
             <div id="revision-container" class="revision-container"></div>
@@ -51,39 +84,23 @@
         <section class="section">
             <div class="section-heading">
                 <div>
-                    <span class="section-label">NEW WORDS</span>
-                    <h2>Today's vocabulary</h2>
+                    <span class="section-label">
+                        NEW WORDS
+                    </span>
+
+                    <h2>
+                        Today's vocabulary
+                    </h2>
                 </div>
             </div>
 
             <div id="words-container" class="words-container"></div>
         </section>
 
-        <section class="test-section">
-            <div class="test-header">
-                <div>
-                    <span class="section-label">DEVELOPER</span>
-                    <h2>Test Mode</h2>
-                </div>
-            </div>
-
-            <p class="test-description">
-                Use these controls to test the revision system without waiting.
-            </p>
-
-            <div class="test-buttons">
-                <button id="make-due-button" class="test-button">
-                    Make a word due now
-                </button>
-
-                <button id="reset-button" class="test-button secondary">
-                    Reset test progress
-                </button>
-            </div>
-        </section>
-
         <footer class="footer">
-            3 words a day • Build vocabulary that sticks
+            <span>
+                3 words a day • Build vocabulary that sticks
+            </span>
         </footer>
 
     </main>

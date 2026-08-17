@@ -25,7 +25,7 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     gap: 16px;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
 }
 
 .brand {
@@ -45,6 +45,42 @@ body {
     color: #777;
     text-align: right;
     line-height: 1.4;
+}
+
+.summary-card {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid #deded8;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: center;
+}
+
+.summary-value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.summary-label {
+    font-size: 9px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.summary-divider {
+    width: 1px;
+    height: 28px;
+    background: #e2e2dc;
 }
 
 .progress-section {
@@ -139,7 +175,7 @@ body {
     padding: 17px;
     border: 1px solid #deded8;
     border-radius: 16px;
-    background: #ffffff;
+    background: #fff;
     box-shadow: 0 5px 18px rgba(0, 0, 0, 0.035);
 }
 
@@ -236,28 +272,23 @@ body {
     color: #555;
 }
 
-.learn-button {
+.learn-button,
+.show-answer-button {
     width: 100%;
     margin-top: 14px;
     padding: 10px 12px;
     border: 1px solid #2f2f2f;
     border-radius: 10px;
     background: #2f2f2f;
-    color: white;
-    font-size: 12px;
+    color: #fff;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
-    transition:
-        background 0.2s ease,
-        transform 0.1s ease;
 }
 
-.learn-button:hover {
+.learn-button:hover,
+.show-answer-button:hover {
     background: #1f1f1f;
-}
-
-.learn-button:active {
-    transform: scale(0.99);
 }
 
 .learn-button.learned {
@@ -353,30 +384,6 @@ body {
     background: #f2f2ee;
 }
 
-.revision-button.hard {
-    border-color: #d9c8c8;
-}
-
-.revision-button.good {
-    border-color: #d3d3c9;
-}
-
-.revision-button.easy {
-    border-color: #c8d3c8;
-}
-
-.show-answer-button {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #2f2f2f;
-    border-radius: 10px;
-    background: #2f2f2f;
-    color: white;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
 .footer {
     margin-top: 18px;
     padding-top: 14px;
@@ -384,55 +391,4 @@ body {
     font-size: 10px;
     color: #8a8a83;
     text-align: center;
-}
-
-.test-section {
-    margin-top: 24px;
-    padding: 14px;
-    border: 1px dashed #d4d4cd;
-    border-radius: 14px;
-    background: #f3f3ee;
-}
-
-.test-header {
-    margin-bottom: 4px;
-}
-
-.test-header h2 {
-    margin: 3px 0 0;
-    font-size: 15px;
-}
-
-.test-description {
-    margin: 8px 0 12px;
-    font-size: 10px;
-    line-height: 1.5;
-    color: #777;
-}
-
-.test-buttons {
-    display: flex;
-    gap: 8px;
-}
-
-.test-button {
-    flex: 1;
-    padding: 9px 8px;
-    border: 1px solid #333;
-    border-radius: 9px;
-    background: #333;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.test-button:hover {
-    background: #222;
-}
-
-.test-button.secondary {
-    border-color: #d0d0c8;
-    background: #fff;
-    color: #555;
 }

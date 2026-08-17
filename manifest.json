@@ -1,12 +1,15 @@
 {
     "manifest_version": 3,
     "name": "LexiLoop",
-    "version": "0.2.0",
-    "description": "Learn three practical English words every day and revise them with spaced repetition.",
+    "version": "0.3.0",
+    "description": "Build practical English vocabulary with daily learning, spaced repetition, and contextual browser reminders.",
     "permissions": [
         "storage",
         "alarms",
         "notifications"
+    ],
+    "host_permissions": [
+        "<all_urls>"
     ],
     "background": {
         "service_worker": "background.js"
@@ -14,5 +17,19 @@
     "action": {
         "default_title": "LexiLoop",
         "default_popup": "popup.html"
-    }
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "content.css"
+            ],
+            "run_at": "document_idle"
+        }
+    ]
 }

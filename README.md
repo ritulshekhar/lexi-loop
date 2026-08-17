@@ -1,27 +1,24 @@
 # LexiLoop
 
-LexiLoop is a minimal Chrome extension designed to help users build practical English vocabulary through daily learning and spaced repetition.
+LexiLoop is a Chrome extension designed to help users build practical English vocabulary through daily learning, spaced repetition, and contextual browser reminders.
 
-## V0.2 Features
+## V0.3 Features
 
-V0.2 introduces the first real learning system.
+V0.3 introduces Chrome-wide interaction.
 
 ### Daily vocabulary
 
-- Three new words per day
+- Three new words every day
 - Meaning
 - Pronunciation
 - Part of speech
 - Synonym
 - Antonym
 - Four example sentences
-- Mark words as learned
 
-### Revision system
+### Spaced repetition
 
-Words become due for revision after being learned.
-
-The default revision intervals are:
+Words are scheduled for revision using:
 
 - 1 day
 - 3 days
@@ -29,40 +26,40 @@ The default revision intervals are:
 - 14 days
 - 30 days
 
-### Recall-based revision
+The interval changes depending on revision performance.
 
-Instead of immediately showing the answer, LexiLoop asks:
+### Browser notifications
 
-> What does this word mean?
+LexiLoop can notify the user when:
 
-The user must first recall the meaning.
+- A new daily vocabulary session is available
+- Words are due for revision
 
-The answer can then be revealed.
+The notification system avoids repeatedly notifying the user during the same day.
 
-### Revision difficulty
+### Contextual browser revision
 
-After seeing the answer, the user can select:
+When a learned word becomes due, LexiLoop can display a small revision card while browsing normal websites.
 
-- Hard
-- Good
-- Easy
+The revision card asks:
 
-These choices influence the next revision interval.
+> Do you remember what this means?
 
-### Word status
+The user can:
 
-Words can move through:
+- Show the answer
+- Open LexiLoop
+- Dismiss the reminder
 
-- New
-- Learning
-- Familiar
-- Mastered
+### Reminder protection
 
-### Persistent progress
+The browser reminder is intentionally limited.
 
-Learning and revision data are stored using Chrome Storage.
+It does not appear continuously.
 
-Closing the popup does not delete progress.
+The current cooldown is 30 minutes.
+
+The user can also dismiss contextual reminders for the rest of the current day.
 
 ## Project Structure
 
@@ -73,5 +70,7 @@ LexiLoop/
 ├── popup.html
 ├── popup.css
 ├── popup.js
+├── content.js
+├── content.css
 ├── words.js
 └── README.md

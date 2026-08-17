@@ -1,16 +1,15 @@
-const ALARM_NAME = "lexiloop-daily-notification";
+const DAILY_ALARM = "lexiloop-daily-check";
+const DAILY_NOTIFICATION_COOLDOWN = 24 * 60 * 60 * 1000;
 
-function getLocalDateKey() {
-    const now = new Date();
-
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
+function getLocalDateKey(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
 }
 
-function getNextAlarmTime() {
+function getNextNineAM() {
     const now = new Date();
     const next = new Date();
 
@@ -24,38 +23,115 @@ function getNextAlarmTime() {
 }
 
 async function ensureDailyAlarm() {
-    const existingAlarm = await chrome.alarms.get(ALARM_NAME);
+    const existingAlarm = await chrome.alarms.get(DAILY_ALARM);
 
     if (!existingAlarm) {
-        await chrome.alarms.create(ALARM_NAME, {
-            when: getNextAlarmTime(),
+        await chrome.alarms.create(DAILY_ALARM, {
+            when: getNextNineAM(),
             periodInMinutes: 24 * 60
         });
     }
 }
 
-async function sendDailyNotification() {
-    const today = getLocalDateKey();
-
-    const data = await chrome.storage.local.get([
-        "lastNotificationDate"
+async function getDueWordCount() {
+    const result = await chrome.storage.local.get([
+        "wordProgress"
     ]);
 
-    if (data.lastNotificationDate === today) {
+    const progress = result.wordProgress || {};
+    const today = getLocalDateKey();
+
+    let count = 0;
+
+    Object.values(progress).forEach((item) => {
+        if (
+            item &&
+            item.dueDate &&
+            item.dueDate <= today
+        ) {
+            count += 1;
+        }
+    });
+
+    return count;
+}
+
+async function getNotificationState() {
+    const result = await chrome.storage.local.get([
+        "lastNotificationDate",
+        "lastStartupNotificationTime"
+    ]);
+
+    return result;
+}
+
+async function canSendDailyNotification() {
+    const state = await getNotificationState();
+    const today = getLocalDateKey();
+
+    if (state.lastNotificationDate === today) {
+        return false;
+    }
+
+    if (
+        state.lastStartupNotificationTime &&
+        Date.now() - state.lastStartupNotificationTime <
+        DAILY_NOTIFICATION_COOLDOWN
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
+async function sendDailyNotification() {
+    const allowed = await canSendDailyNotification();
+
+    if (!allowed) {
         return;
     }
 
-    await chrome.notifications.create(`lexiloop-${today}`, {
-        type: "basic",
-        title: "LexiLoop — Time to Learn",
-        message: "Your 3 new words and any due revisions are waiting.",
-        iconUrl:
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAJ0lEQVR42mNkwAUA4z8TAxMDAwMDAwPjPwMDAwMDwT8QMAAIMAAE3hD2qAAAAAElFTkSuQmCC"
-    });
+    const dueCount = await getDueWordCount();
 
-    await chrome.storage.local.set({
-        lastNotificationDate: today
-    });
+    let message =
+        "Your 3 new vocabulary words are ready.";
+
+    if (dueCount === 1) {
+        message += " You also have 1 word due for revision.";
+    }
+
+    if (dueCount > 1) {
+        message +=
+            ` You also have ${dueCount} words due for revision.`;
+    }
+
+    try {
+        await chrome.notifications.create(
+            `lexiloop-daily-${Date.now()}`,
+            {
+                type: "basic",
+                title: "LexiLoop",
+                message,
+                iconUrl:
+                    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAJ0lEQVR42mNkwAUA4z8TAxMDAwMDAwPjPwMDAwMDwT8QMAAIMAAE3hD2qAAAAAElFTkSuQmCC"
+            }
+        );
+
+        await chrome.storage.local.set({
+            lastNotificationDate: getLocalDateKey(),
+            lastStartupNotificationTime: Date.now()
+        });
+    } catch (error) {
+        console.error(
+            "Failed to send LexiLoop notification:",
+            error
+        );
+    }
+}
+
+async function handleBrowserStart() {
+    await ensureDailyAlarm();
+    await sendDailyNotification();
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -63,21 +139,37 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 
 chrome.runtime.onStartup.addListener(async () => {
-    await ensureDailyAlarm();
+    await handleBrowserStart();
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-    if (alarm.name !== ALARM_NAME) {
+    if (alarm.name !== DAILY_ALARM) {
         return;
     }
 
     await sendDailyNotification();
 });
 
-chrome.notifications.onClicked.addListener(async () => {
-    try {
-        await chrome.action.openPopup();
-    } catch (error) {
-        console.warn("Could not open LexiLoop popup:", error);
+chrome.runtime.onMessage.addListener(
+    (message, sender, sendResponse) => {
+        if (message?.type === "GET_DUE_COUNT") {
+            getDueWordCount()
+                .then((count) => {
+                    sendResponse({
+                        success: true,
+                        count
+                    });
+                })
+                .catch((error) => {
+                    console.error(error);
+
+                    sendResponse({
+                        success: false,
+                        count: 0
+                    });
+                });
+
+            return true;
+        }
     }
-});
+);
