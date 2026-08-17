@@ -121,20 +121,6 @@ async function getDailyData(progress) {
     return dailyData;
 }
 
-async function getDueWords(progress) {
-    const today = getDateKey();
-
-    return WORDS.filter((word) => {
-        const item = progress[word.word];
-
-        if (!item || !item.dueDate) {
-            return false;
-        }
-
-        return item.dueDate <= today;
-    });
-}
-
 function createWordCard(word, savedWord, index, dailyData) {
     const card = document.createElement("article");
 
@@ -178,7 +164,8 @@ function createWordCard(word, savedWord, index, dailyData) {
     <span class="relation-value"></span>
   `;
 
-    synonym.querySelector(".relation-value").textContent = word.synonym;
+    synonym.querySelector(".relation-value").textContent =
+        word.synonym;
 
     const antonym = document.createElement("div");
     antonym.className = "relation";
@@ -187,7 +174,8 @@ function createWordCard(word, savedWord, index, dailyData) {
     <span class="relation-value"></span>
   `;
 
-    antonym.querySelector(".relation-value").textContent = word.antonym;
+    antonym.querySelector(".relation-value").textContent =
+        word.antonym;
 
     relations.appendChild(synonym);
     relations.appendChild(antonym);
@@ -344,8 +332,6 @@ function createRevisionCard(word, progress, onCompleted) {
         item.lastReviewed = getDateKey();
 
         if (result === "hard") {
-            item.correctReviews += 0;
-
             item.intervalIndex = Math.max(
                 0,
                 item.intervalIndex - 1
@@ -363,16 +349,15 @@ function createRevisionCard(word, progress, onCompleted) {
                 REVISION_INTERVALS.length - 1
             );
 
-            const newInterval =
-                REVISION_INTERVALS[item.intervalIndex];
-
             item.dueDate = addDays(
                 getDateKey(),
-                newInterval
+                REVISION_INTERVALS[item.intervalIndex]
             );
 
             item.status =
-                item.intervalIndex >= 3 ? "familiar" : "learning";
+                item.intervalIndex >= 3
+                    ? "familiar"
+                    : "learning";
         }
 
         if (result === "easy") {
@@ -383,20 +368,20 @@ function createRevisionCard(word, progress, onCompleted) {
                 REVISION_INTERVALS.length - 1
             );
 
-            const newInterval =
-                REVISION_INTERVALS[item.intervalIndex];
-
             item.dueDate = addDays(
                 getDateKey(),
-                newInterval
+                REVISION_INTERVALS[item.intervalIndex]
             );
 
             item.status =
-                item.intervalIndex >= 4 ? "mastered" : "familiar";
+                item.intervalIndex >= 4
+                    ? "mastered"
+                    : "familiar";
         }
 
         await saveWordProgress(updatedProgress);
-        onCompleted();
+
+        await onCompleted();
     }
 
     hardButton.addEventListener("click", () => {
@@ -420,32 +405,18 @@ function createRevisionCard(word, progress, onCompleted) {
     return card;
 }
 
-function updateProgress(dailyData, revisionCount) {
-    const learnedCount = dailyData.words.filter(
-        (item) => item.learned
-    ).length;
+async function getDueWords(progress) {
+    const today = getDateKey();
 
-    const progressText = document.getElementById("progress-text");
-    const progressBar = document.getElementById("progress-bar");
-    const completionMessage = document.getElementById(
-        "completion-message"
-    );
+    return WORDS.filter((word) => {
+        const item = progress[word.word];
 
-    progressText.textContent =
-        `${learnedCount}/3 new words` +
-        (revisionCount > 0
-            ? ` • ${revisionCount} revision${revisionCount === 1 ? "" : "s"}`
-            : "");
+        if (!item || !item.dueDate) {
+            return false;
+        }
 
-    progressBar.style.width =
-        `${(learnedCount / 3) * 100}%`;
-
-    const hasCompletedNewWords = learnedCount === 3;
-
-    completionMessage.classList.toggle(
-        "hidden",
-        !hasCompletedNewWords
-    );
+        return item.dueDate <= today;
+    });
 }
 
 async function renderRevisions(progress) {
@@ -461,7 +432,6 @@ async function renderRevisions(progress) {
     const dueWords = await getDueWords(progress);
 
     revisionContainer.innerHTML = "";
-
     revisionCount.textContent = dueWords.length;
 
     if (dueWords.length === 0) {
@@ -484,6 +454,76 @@ async function renderRevisions(progress) {
     });
 
     return dueWords.length;
+}
+
+function updateProgress(dailyData, revisionCount) {
+    const learnedCount = dailyData.words.filter(
+        (item) => item.learned
+    ).length;
+
+    const progressText =
+        document.getElementById("progress-text");
+
+    const progressBar =
+        document.getElementById("progress-bar");
+
+    const completionMessage =
+        document.getElementById("completion-message");
+
+    progressText.textContent =
+        `${learnedCount}/3 new words` +
+        (revisionCount > 0
+            ? ` • ${revisionCount} revision${revisionCount === 1 ? "" : "s"}`
+            : "");
+
+    progressBar.style.width =
+        `${(learnedCount / 3) * 100}%`;
+
+    completionMessage.classList.toggle(
+        "hidden",
+        learnedCount !== 3
+    );
+}
+
+async function makeWordDueNow() {
+    const progress = await getWordProgress();
+
+    const learnedWords = WORDS.filter(
+        (word) => progress[word.word]
+    );
+
+    if (learnedWords.length === 0) {
+        alert(
+            "No learned words available yet. Learn at least one word first."
+        );
+        return;
+    }
+
+    const selectedWord =
+        learnedWords[learnedWords.length - 1];
+
+    progress[selectedWord.word].dueDate = getDateKey();
+
+    await saveWordProgress(progress);
+
+    await render();
+}
+
+async function resetTestProgress() {
+    const confirmed = confirm(
+        "Reset LexiLoop test data? Today's words and learning progress will be cleared."
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    await chrome.storage.local.remove([
+        STORAGE_KEYS.dailyData,
+        STORAGE_KEYS.wordProgress
+    ]);
+
+    await render();
 }
 
 async function render() {
@@ -514,9 +554,13 @@ async function render() {
         wordsContainer.appendChild(card);
     });
 
-    const dueCount = await renderRevisions(progress);
+    const dueCount =
+        await renderRevisions(progress);
 
-    updateProgress(dailyData, dueCount);
+    updateProgress(
+        dailyData,
+        dueCount
+    );
 }
 
 function initializeDate() {
@@ -524,9 +568,28 @@ function initializeDate() {
         getFormattedDate();
 }
 
+function initializeTestMode() {
+    const makeDueButton =
+        document.getElementById("make-due-button");
+
+    const resetButton =
+        document.getElementById("reset-button");
+
+    makeDueButton.addEventListener(
+        "click",
+        makeWordDueNow
+    );
+
+    resetButton.addEventListener(
+        "click",
+        resetTestProgress
+    );
+}
+
 async function initialize() {
     try {
         initializeDate();
+        initializeTestMode();
         await render();
     } catch (error) {
         console.error(
@@ -535,7 +598,9 @@ async function initialize() {
         );
 
         const container =
-            document.getElementById("words-container");
+            document.getElementById(
+                "words-container"
+            );
 
         container.innerHTML = `
       <div class="word-card">
