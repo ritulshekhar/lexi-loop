@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "LexiLoop",
+    "version": "0.1.0",
+    "description": "Learn three practical English words every day.",
+    "permissions": [
+        "storage",
+        "alarms",
+        "notifications"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_title": "LexiLoop",
+        "default_popup": "popup.html"
+    }
+}
