@@ -24,9 +24,9 @@ function getNextAlarmTime() {
 }
 
 async function ensureDailyAlarm() {
-    const alarm = await chrome.alarms.get(ALARM_NAME);
+    const existingAlarm = await chrome.alarms.get(ALARM_NAME);
 
-    if (!alarm) {
+    if (!existingAlarm) {
         await chrome.alarms.create(ALARM_NAME, {
             when: getNextAlarmTime(),
             periodInMinutes: 24 * 60
@@ -36,7 +36,10 @@ async function ensureDailyAlarm() {
 
 async function sendDailyNotification() {
     const today = getLocalDateKey();
-    const data = await chrome.storage.local.get(["lastNotificationDate"]);
+
+    const data = await chrome.storage.local.get([
+        "lastNotificationDate"
+    ]);
 
     if (data.lastNotificationDate === today) {
         return;
@@ -44,9 +47,10 @@ async function sendDailyNotification() {
 
     await chrome.notifications.create(`lexiloop-${today}`, {
         type: "basic",
-        title: "LexiLoop — Today's Words",
-        message: "Your 3 vocabulary words are ready.",
-        iconUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAJ0lEQVR42mNkwAUA4z8TAxMDAwMDAwPjPwMDAwMDwT8QMAAIMAAE3hD2qAAAAAElFTkSuQmCC"
+        title: "LexiLoop — Time to Learn",
+        message: "Your 3 new words and any due revisions are waiting.",
+        iconUrl:
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAJ0lEQVR42mNkwAUA4z8TAxMDAwMDAwPjPwMDAwMDwT8QMAAIMAAE3hD2qAAAAAElFTkSuQmCC"
     });
 
     await chrome.storage.local.set({
@@ -74,6 +78,6 @@ chrome.notifications.onClicked.addListener(async () => {
     try {
         await chrome.action.openPopup();
     } catch (error) {
-        console.warn("Could not open extension popup:", error);
+        console.warn("Could not open LexiLoop popup:", error);
     }
 });

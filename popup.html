@@ -10,6 +10,7 @@
 
 <body>
     <main class="app">
+
         <header class="header">
             <div>
                 <div class="brand">LexiLoop</div>
@@ -22,7 +23,7 @@
         <section class="progress-section">
             <div class="progress-top">
                 <span>Today's progress</span>
-                <span id="progress-text">0/3 learned</span>
+                <span id="progress-text">0/3 new words</span>
             </div>
 
             <div class="progress-track">
@@ -30,15 +31,38 @@
             </div>
         </section>
 
-        <div id="completion-message" class="completion-message hidden">
-            Nice work. Today's vocabulary is complete.
-        </div>
+        <section id="completion-message" class="completion-message hidden">
+            Nice work. Today's learning is complete.
+        </section>
 
-        <section id="words-container" class="words-container"></section>
+        <section id="revision-section" class="section hidden">
+            <div class="section-heading">
+                <div>
+                    <span class="section-label">REVISION</span>
+                    <h2>Words due today</h2>
+                </div>
+
+                <span class="section-count" id="revision-count">0</span>
+            </div>
+
+            <div id="revision-container" class="revision-container"></div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <span class="section-label">NEW WORDS</span>
+                    <h2>Today's vocabulary</h2>
+                </div>
+            </div>
+
+            <div id="words-container" class="words-container"></div>
+        </section>
 
         <footer class="footer">
             3 words a day • Build vocabulary that sticks
         </footer>
+
     </main>
 
     <script src="words.js"></script>

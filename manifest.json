@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "LexiLoop",
-    "version": "0.1.0",
-    "description": "Learn three practical English words every day.",
+    "version": "0.2.0",
+    "description": "Learn three practical English words every day and revise them with spaced repetition.",
     "permissions": [
         "storage",
         "alarms",
