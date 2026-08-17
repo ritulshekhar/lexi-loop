@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "LexiLoop",
-    "version": "0.4.0",
-    "description": "Build practical English vocabulary with adaptive learning and personalized spaced repetition.",
+    "version": "0.5.0",
+    "description": "Build practical English vocabulary with adaptive learning, spaced repetition, and progress analytics.",
     "permissions": [
         "storage",
         "alarms",

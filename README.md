@@ -1,10 +1,10 @@
 # LexiLoop
 
-LexiLoop is a Chrome extension designed to help users build practical English vocabulary through daily learning, spaced repetition, adaptive revision, and contextual browser reminders.
+LexiLoop is a Chrome extension designed to help users build practical English vocabulary through daily learning, spaced repetition, adaptive revision, contextual browser reminders, and learning analytics.
 
-## V0.4 Features
+## V0.5 Features
 
-V0.4 introduces personalized learning.
+V0.5 introduces the progress dashboard.
 
 ### Daily vocabulary
 
@@ -16,79 +16,65 @@ V0.4 introduces personalized learning.
 - Antonym
 - Four example sentences
 
-### Adaptive mastery score
+### Adaptive learning
 
-Every learned word receives a mastery score from:
+Every learned word receives a mastery score from 0 to 100.
 
-0 to 100
+Revision performance changes:
 
-The score changes according to revision performance.
+- Mastery score
+- Learning status
+- Next revision interval
+- Revision priority
 
-- Hard: score decreases
-- Good: score increases moderately
-- Easy: score increases faster
+### Progress dashboard
 
-### Adaptive revision intervals
+The extension now tracks:
 
-Revision intervals now adapt according to performance.
+- Total words learned
+- Total mastered words
+- Total revisions
+- Revision accuracy
+- Current learning streak
+- Number of active learning days
+- Average mastery
 
-Possible intervals include:
+### Mastery distribution
 
-- 1 day
-- 3 days
-- 7 days
-- 14 days
-- 30 days
-- 45 days
+Vocabulary is grouped into:
 
-Hard words return sooner.
-
-Words that are consistently easy move further apart.
-
-### Personalized revision priority
-
-When multiple words are due, LexiLoop prioritizes words with lower mastery scores.
-
-This means words the user struggles with are shown before words they already know well.
-
-### Mastery levels
-
-Words move through:
-
-- New
 - Learning
 - Familiar
 - Mastered
 
-### Average mastery
+### Weakest words
 
-The popup displays the user's average mastery score across learned vocabulary.
+LexiLoop displays the user's lowest-scoring vocabulary so the user can focus on words that need more attention.
 
-### Contextual browser reminders
+### Strongest words
 
-V0.3 browser reminders continue to work.
+The dashboard also displays the user's highest-scoring vocabulary.
 
-The contextual revision system now prioritizes the user's weakest due words.
+### Recent vocabulary
 
-## Learning model
+Recently studied words are displayed with their latest activity date.
 
-The basic adaptive flow is:
+## Learning streak
+
+A day is considered active when the user learns a new word or completes a revision.
+
+The streak counts consecutive active calendar days.
+
+## Project Structure
 
 ```text
-New
- ↓
-Learned
- ↓
-Revision
- ↓
-Performance recorded
- ↓
-Mastery score updated
- ↓
-Next interval adjusted
- ↓
-Repeated revision
- ↓
-Familiar
- ↓
-Mastered
+LexiLoop/
+├── manifest.json
+├── background.js
+├── popup.html
+├── popup.css
+├── popup.js
+├── content.js
+├── content.css
+├── words.js
+└── README.md

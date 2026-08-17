@@ -9,7 +9,8 @@ const REVISION_INTERVALS = [
 
 const STORAGE_KEYS = {
     dailyData: "dailyData",
-    wordProgress: "wordProgress"
+    wordProgress: "wordProgress",
+    activityHistory: "activityHistory"
 };
 
 function getDateKey(date = new Date()) {
@@ -104,6 +105,70 @@ async function saveWordProgress(
         [STORAGE_KEYS.wordProgress]:
             progress
     });
+}
+
+async function getActivityHistory() {
+    const result =
+        await chrome.storage.local.get([
+            STORAGE_KEYS.activityHistory
+        ]);
+
+    return (
+        result[
+        STORAGE_KEYS.activityHistory
+        ] || []
+    );
+}
+
+async function recordActivity() {
+    const history =
+        await getActivityHistory();
+
+    const today =
+        getDateKey();
+
+    if (
+        !history.includes(today)
+    ) {
+        history.push(today);
+    }
+
+    history.sort();
+
+    await chrome.storage.local.set({
+        [STORAGE_KEYS.activityHistory]:
+            history
+    });
+}
+
+function calculateStreak(
+    history
+) {
+    if (!history.length) {
+        return 0;
+    }
+
+    const dates =
+        new Set(history);
+
+    let cursor =
+        new Date();
+
+    let streak = 0;
+
+    while (
+        dates.has(
+            getDateKey(cursor)
+        )
+    ) {
+        streak += 1;
+
+        cursor.setDate(
+            cursor.getDate() - 1
+        );
+    }
+
+    return streak;
 }
 
 function createDefaultProgress(
@@ -244,26 +309,30 @@ function getNextIntervalIndex(
     progress,
     result
 ) {
-    let index =
-        progress.intervalIndex;
+    const current =
+        progress.intervalIndex || 0;
 
-    if (result === "hard") {
+    if (
+        result === "hard"
+    ) {
         return Math.max(
             0,
-            index - 1
+            current - 1
         );
     }
 
-    if (result === "good") {
+    if (
+        result === "good"
+    ) {
         return Math.min(
             REVISION_INTERVALS.length - 1,
-            index + 1
+            current + 1
         );
     }
 
     return Math.min(
         REVISION_INTERVALS.length - 1,
-        index + 2
+        current + 2
     );
 }
 
@@ -274,21 +343,30 @@ function updateMasteryScore(
     let score =
         progress.masteryScore || 0;
 
-    if (result === "hard") {
+    if (
+        result === "hard"
+    ) {
         score -= 15;
     }
 
-    if (result === "good") {
+    if (
+        result === "good"
+    ) {
         score += 10;
     }
 
-    if (result === "easy") {
+    if (
+        result === "easy"
+    ) {
         score += 20;
     }
 
     return Math.max(
         0,
-        Math.min(100, score)
+        Math.min(
+            100,
+            score
+        )
     );
 }
 
@@ -539,6 +617,11 @@ function createWordCard(
                     .lastReviewed =
                     getDateKey();
 
+                progress[word.word]
+                    .totalReviews =
+                    progress[word.word]
+                        .totalReviews || 0;
+
                 dailyData.words[index]
                     .learned = true;
 
@@ -550,6 +633,8 @@ function createWordCard(
                     [STORAGE_KEYS.dailyData]:
                         dailyData
                 });
+
+                await recordActivity();
 
                 await render();
             }
@@ -680,7 +765,8 @@ function createRevisionCard(
         "mastery-fill";
 
     masteryFill.style.width =
-        `${progress.masteryScore || 0}%`;
+        `${progress.masteryScore || 0
+        }%`;
 
     masteryTrack.appendChild(
         masteryFill
@@ -829,7 +915,15 @@ function createRevisionCard(
             return;
         }
 
-        item.totalReviews += 1;
+        item.totalReviews =
+            (item.totalReviews || 0) + 1;
+
+        if (
+            result !== "hard"
+        ) {
+            item.correctReviews =
+                (item.correctReviews || 0) + 1;
+        }
 
         item.lastReviewed =
             getDateKey();
@@ -854,6 +948,9 @@ function createRevisionCard(
                     getDateKey(),
                     1
                 );
+
+            item.status =
+                "learning";
         } else {
             item.dueDate =
                 addDays(
@@ -862,23 +959,18 @@ function createRevisionCard(
                     item.intervalIndex
                     ]
                 );
-        }
 
-        item.status =
-            getMasteryLabel(
-                item.masteryScore
-            ).toLowerCase();
-
-        if (
-            result === "hard"
-        ) {
             item.status =
-                "learning";
+                getMasteryLabel(
+                    item.masteryScore
+                ).toLowerCase();
         }
 
         await saveWordProgress(
             updatedProgress
         );
+
+        await recordActivity();
 
         await onCompleted();
     }
@@ -886,27 +978,21 @@ function createRevisionCard(
     hardButton.addEventListener(
         "click",
         () => {
-            completeReview(
-                "hard"
-            );
+            completeReview("hard");
         }
     );
 
     goodButton.addEventListener(
         "click",
         () => {
-            completeReview(
-                "good"
-            );
+            completeReview("good");
         }
     );
 
     easyButton.addEventListener(
         "click",
         () => {
-            completeReview(
-                "easy"
-            );
+            completeReview("easy");
         }
     );
 
@@ -960,11 +1046,11 @@ async function getDueWords(
             (a, b) => {
                 const aScore =
                     progress[a.word]
-                        .masteryScore || 0;
+                        ?.masteryScore || 0;
 
                 const bScore =
                     progress[b.word]
-                        .masteryScore || 0;
+                        ?.masteryScore || 0;
 
                 return (
                     aScore -
@@ -978,9 +1064,7 @@ function calculateAverageMastery(
     progress
 ) {
     const values =
-        Object.values(
-            progress
-        )
+        Object.values(progress)
             .map(
                 (item) =>
                     item.masteryScore || 0
@@ -1001,6 +1085,119 @@ function calculateAverageMastery(
 
     return Math.round(
         total / values.length
+    );
+}
+
+function calculateAccuracy(
+    progress
+) {
+    let reviews = 0;
+    let correct = 0;
+
+    Object.values(progress)
+        .forEach(
+            (item) => {
+                reviews +=
+                    item.totalReviews || 0;
+
+                correct +=
+                    item.correctReviews || 0;
+            }
+        );
+
+    if (
+        reviews === 0
+    ) {
+        return null;
+    }
+
+    return Math.round(
+        (correct / reviews) *
+        100
+    );
+}
+
+function getMasteryDistribution(
+    progress
+) {
+    const items =
+        Object.values(progress);
+
+    const distribution = {
+        learning: 0,
+        familiar: 0,
+        mastered: 0
+    };
+
+    items.forEach(
+        (item) => {
+            const score =
+                item.masteryScore || 0;
+
+            if (
+                score >= 85
+            ) {
+                distribution.mastered +=
+                    1;
+
+                return;
+            }
+
+            if (
+                score >= 60
+            ) {
+                distribution.familiar +=
+                    1;
+
+                return;
+            }
+
+            distribution.learning +=
+                1;
+        }
+    );
+
+    return distribution;
+}
+
+function formatRecentDate(
+    dateKey
+) {
+    if (!dateKey) {
+        return "Not reviewed yet";
+    }
+
+    const today =
+        getDateKey();
+
+    if (
+        dateKey === today
+    ) {
+        return "Today";
+    }
+
+    const yesterday =
+        addDays(
+            today,
+            -1
+        );
+
+    if (
+        dateKey === yesterday
+    ) {
+        return "Yesterday";
+    }
+
+    return new Intl.DateTimeFormat(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric"
+        }
+    ).format(
+        new Date(
+            `${dateKey}T00:00:00`
+        )
     );
 }
 
@@ -1067,6 +1264,391 @@ async function renderRevisions(
     return dueWords.length;
 }
 
+function renderAnalyticsList(
+    containerId,
+    items,
+    emptyText
+) {
+    const container =
+        document.getElementById(
+            containerId
+        );
+
+    container.innerHTML =
+        "";
+
+    if (
+        items.length === 0
+    ) {
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+        empty.className =
+            "empty-state";
+
+        empty.textContent =
+            emptyText;
+
+        container.appendChild(
+            empty
+        );
+
+        return;
+    }
+
+    items.forEach(
+        ({ word, score }) => {
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "analytics-item";
+
+            const wordElement =
+                document.createElement(
+                    "span"
+                );
+
+            wordElement.className =
+                "analytics-word";
+
+            wordElement.textContent =
+                word;
+
+            const right =
+                document.createElement(
+                    "div"
+                );
+
+            right.className =
+                "analytics-right";
+
+            const bar =
+                document.createElement(
+                    "div"
+                );
+
+            bar.className =
+                "analytics-bar";
+
+            const fill =
+                document.createElement(
+                    "div"
+                );
+
+            fill.className =
+                "analytics-bar-fill";
+
+            fill.style.width =
+                `${score}%`;
+
+            bar.appendChild(
+                fill
+            );
+
+            const scoreElement =
+                document.createElement(
+                    "span"
+                );
+
+            scoreElement.className =
+                "analytics-score";
+
+            scoreElement.textContent =
+                `${score}%`;
+
+            right.appendChild(
+                bar
+            );
+
+            right.appendChild(
+                scoreElement
+            );
+
+            item.appendChild(
+                wordElement
+            );
+
+            item.appendChild(
+                right
+            );
+
+            container.appendChild(
+                item
+            );
+        }
+    );
+}
+
+function renderDashboard(
+    progress,
+    activityHistory
+) {
+    const entries =
+        Object.values(progress);
+
+    const totalWords =
+        entries.length;
+
+    const masteredWords =
+        entries.filter(
+            (item) =>
+                (item.masteryScore || 0) >=
+                85
+        ).length;
+
+    const totalReviews =
+        entries.reduce(
+            (sum, item) =>
+                sum +
+                (item.totalReviews || 0),
+            0
+        );
+
+    const accuracy =
+        calculateAccuracy(
+            progress
+        );
+
+    const average =
+        calculateAverageMastery(
+            progress
+        );
+
+    const streak =
+        calculateStreak(
+            activityHistory
+        );
+
+    document.getElementById(
+        "total-words"
+    ).textContent =
+        totalWords;
+
+    document.getElementById(
+        "mastered-words"
+    ).textContent =
+        masteredWords;
+
+    document.getElementById(
+        "total-reviews"
+    ).textContent =
+        totalReviews;
+
+    document.getElementById(
+        "accuracy"
+    ).textContent =
+        accuracy === null
+            ? "—"
+            : `${accuracy}%`;
+
+    document.getElementById(
+        "streak"
+    ).textContent =
+        streak;
+
+    document.getElementById(
+        "active-days"
+    ).textContent =
+        activityHistory.length;
+
+    const distribution =
+        getMasteryDistribution(
+            progress
+        );
+
+    document.getElementById(
+        "learning-count"
+    ).textContent =
+        distribution.learning;
+
+    document.getElementById(
+        "familiar-count"
+    ).textContent =
+        distribution.familiar;
+
+    document.getElementById(
+        "mastered-count"
+    ).textContent =
+        distribution.mastered;
+
+    const denominator =
+        Math.max(
+            1,
+            totalWords
+        );
+
+    document.getElementById(
+        "learning-fill"
+    ).style.width =
+        `${(
+            distribution.learning /
+            denominator
+        ) * 100
+        }%`;
+
+    document.getElementById(
+        "familiar-fill"
+    ).style.width =
+        `${(
+            distribution.familiar /
+            denominator
+        ) * 100
+        }%`;
+
+    document.getElementById(
+        "mastered-fill"
+    ).style.width =
+        `${(
+            distribution.mastered /
+            denominator
+        ) * 100
+        }%`;
+
+    const scoredWords =
+        entries
+            .map(
+                (item) => ({
+                    word: item.word,
+                    score:
+                        item.masteryScore || 0
+                })
+            );
+
+    const weakest =
+        [...scoredWords]
+            .sort(
+                (a, b) =>
+                    a.score -
+                    b.score
+            )
+            .slice(0, 5);
+
+    const strongest =
+        [...scoredWords]
+            .sort(
+                (a, b) =>
+                    b.score -
+                    a.score
+            )
+            .slice(0, 5);
+
+    renderAnalyticsList(
+        "weakest-container",
+        weakest,
+        "Learn a few words first and your weakest vocabulary will appear here."
+    );
+
+    renderAnalyticsList(
+        "strongest-container",
+        strongest,
+        "Your strongest words will appear here as you build mastery."
+    );
+
+    const recent =
+        [...entries]
+            .filter(
+                (item) =>
+                    item.lastReviewed
+            )
+            .sort(
+                (a, b) =>
+                    new Date(
+                        `${b.lastReviewed}T00:00:00`
+                    ) -
+                    new Date(
+                        `${a.lastReviewed}T00:00:00`
+                    )
+            )
+            .slice(0, 6);
+
+    const recentContainer =
+        document.getElementById(
+            "recent-container"
+        );
+
+    recentContainer.innerHTML =
+        "";
+
+    if (
+        recent.length === 0
+    ) {
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+        empty.className =
+            "empty-state";
+
+        empty.textContent =
+            "Your recent vocabulary will appear here.";
+
+        recentContainer.appendChild(
+            empty
+        );
+    } else {
+        recent.forEach(
+            (item) => {
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+                row.className =
+                    "recent-item";
+
+                const word =
+                    document.createElement(
+                        "span"
+                    );
+
+                word.className =
+                    "recent-word";
+
+                word.textContent =
+                    item.word;
+
+                const date =
+                    document.createElement(
+                        "span"
+                    );
+
+                date.className =
+                    "recent-date";
+
+                date.textContent =
+                    formatRecentDate(
+                        item.lastReviewed
+                    );
+
+                row.appendChild(
+                    word
+                );
+
+                row.appendChild(
+                    date
+                );
+
+                recentContainer.appendChild(
+                    row
+                );
+            }
+        );
+    }
+
+    document.getElementById(
+        "mastery-score"
+    ).textContent =
+        average === null
+            ? "—"
+            : `${average}%`;
+}
+
 function updateProgress(
     dailyData,
     revisionCount,
@@ -1103,11 +1685,6 @@ function updateProgress(
             "due-count"
         );
 
-    const masteryScore =
-        document.getElementById(
-            "mastery-score"
-        );
-
     const average =
         calculateAverageMastery(
             progress
@@ -1119,11 +1696,6 @@ function updateProgress(
     dueCount.textContent =
         revisionCount;
 
-    masteryScore.textContent =
-        average === null
-            ? "—"
-            : `${average}%`;
-
     progressText.textContent =
         `${learnedCount}/3 new words`;
 
@@ -1134,6 +1706,13 @@ function updateProgress(
         "hidden",
         learnedCount !== 3
     );
+
+    document.getElementById(
+        "mastery-score"
+    ).textContent =
+        average === null
+            ? "—"
+            : `${average}%`;
 }
 
 async function render() {
@@ -1144,6 +1723,9 @@ async function render() {
         await getDailyData(
             progress
         );
+
+    const activityHistory =
+        await getActivityHistory();
 
     const wordsContainer =
         document.getElementById(
@@ -1189,6 +1771,11 @@ async function render() {
         dailyData,
         dueCount,
         progress
+    );
+
+    renderDashboard(
+        progress,
+        activityHistory
     );
 }
 
