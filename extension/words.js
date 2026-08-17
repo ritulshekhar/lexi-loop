@@ -418,5 +418,61 @@ const WORDS = [
             "He was meticulous about documenting every change.",
             "Her meticulous work helped us identify the error."
         ]
+    },
+    {
+        word: "circle back",
+        pronunciation: "/ˈsɜːrkəl bæk/",
+        partOfSpeech: "phrasal verb",
+        meaning: "To return to a topic or discussion later.",
+        synonym: "revisit",
+        antonym: "settle",
+        examples: [
+            "Let's circle back to this after the client responds.",
+            "I'll circle back once I have the updated numbers.",
+            "We can circle back on the remaining issues tomorrow.",
+            "The manager said she would circle back with more details."
+        ]
+    },
+    {
+        word: "touch base",
+        pronunciation: "/tʌtʃ beɪs/",
+        partOfSpeech: "idiom",
+        meaning: "To contact someone briefly to exchange information or check progress.",
+        synonym: "connect",
+        antonym: "disconnect",
+        examples: [
+            "Let's touch base before the client meeting.",
+            "I'll touch base with the development team.",
+            "We should touch base next week about the proposal.",
+            "She touched base with the client before sending the report."
+        ]
+    },
+    {
+        word: "on the same page",
+        pronunciation: "/ɑːn ðə seɪm peɪdʒ/",
+        partOfSpeech: "idiom",
+        meaning: "To have the same understanding, expectations, or goals.",
+        synonym: "aligned",
+        antonym: "misaligned",
+        examples: [
+            "Let's make sure we're all on the same page.",
+            "I want to confirm that the client and our team are on the same page.",
+            "The meeting helped everyone get on the same page.",
+            "Before we proceed, let's ensure we're on the same page about scope."
+        ]
+    },
+    {
+        word: "move forward",
+        pronunciation: "/muːv ˈfɔːrwərd/",
+        partOfSpeech: "phrasal verb",
+        meaning: "To proceed with a plan, activity, or decision.",
+        synonym: "proceed",
+        antonym: "stop",
+        examples: [
+            "We can move forward once the client approves the proposal.",
+            "The team decided to move forward with the new design.",
+            "Let's move forward with the implementation.",
+            "We need approval before we can move forward."
+        ]
     }
 ];

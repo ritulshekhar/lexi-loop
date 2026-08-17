@@ -22,27 +22,22 @@ function getNextNineAM() {
     next.setHours(9, 0, 0, 0);
 
     if (next <= now) {
-        next.setDate(
-            next.getDate() + 1
-        );
+        next.setDate(next.getDate() + 1);
     }
 
     return next.getTime();
 }
 
 async function ensureDailyAlarm() {
-    const existingAlarm =
-        await chrome.alarms.get(
-            DAILY_ALARM
-        );
+    const alarm =
+        await chrome.alarms.get(DAILY_ALARM);
 
-    if (!existingAlarm) {
+    if (!alarm) {
         await chrome.alarms.create(
             DAILY_ALARM,
             {
                 when: getNextNineAM(),
-                periodInMinutes:
-                    24 * 60
+                periodInMinutes: 24 * 60
             }
         );
     }
@@ -50,9 +45,9 @@ async function ensureDailyAlarm() {
 
 async function getDueWordCount() {
     const result =
-        await chrome.storage.local.get(
-            ["wordProgress"]
-        );
+        await chrome.storage.local.get([
+            "wordProgress"
+        ]);
 
     const progress =
         result.wordProgress || {};
@@ -70,44 +65,28 @@ async function getDueWordCount() {
         .length;
 }
 
-async function getDailyNotificationState() {
-    return chrome.storage.local.get([
-        "lastNotificationDate",
-        "lastStartupNotificationTime"
-    ]);
-}
-
-async function canSendDailyNotification() {
-    const state =
-        await getDailyNotificationState();
-
+async function sendDailyNotification() {
     const today =
         getLocalDateKey();
 
+    const result =
+        await chrome.storage.local.get([
+            "lastNotificationDate",
+            "lastStartupNotificationTime"
+        ]);
+
     if (
-        state.lastNotificationDate ===
-        today
+        result.lastNotificationDate === today
     ) {
-        return false;
+        return;
     }
 
     if (
-        state.lastStartupNotificationTime &&
+        result.lastStartupNotificationTime &&
         Date.now() -
-        state.lastStartupNotificationTime <
+        result.lastStartupNotificationTime <
         DAILY_NOTIFICATION_COOLDOWN
     ) {
-        return false;
-    }
-
-    return true;
-}
-
-async function sendDailyNotification() {
-    const allowed =
-        await canSendDailyNotification();
-
-    if (!allowed) {
         return;
     }
 
@@ -115,21 +94,16 @@ async function sendDailyNotification() {
         await getDueWordCount();
 
     let message =
-        "Your 3 new vocabulary words are ready.";
+        "Your personalized vocabulary session is ready.";
 
-    if (dueCount === 1) {
+    if (dueCount > 0) {
         message +=
-            " You also have 1 word due for revision.";
-    }
-
-    if (dueCount > 1) {
-        message +=
-            ` You also have ${dueCount} words due for revision.`;
+            ` ${dueCount} word${dueCount === 1 ? "" : "s"} also need${dueCount === 1 ? "s" : ""} revision.`;
     }
 
     try {
         await chrome.notifications.create(
-            `lexiloop-daily-${Date.now()}`,
+            `lexiloop-${Date.now()}`,
             {
                 type: "basic",
                 title: "LexiLoop",
@@ -140,23 +114,15 @@ async function sendDailyNotification() {
         );
 
         await chrome.storage.local.set({
-            lastNotificationDate:
-                getLocalDateKey(),
-
-            lastStartupNotificationTime:
-                Date.now()
+            lastNotificationDate: today,
+            lastStartupNotificationTime: Date.now()
         });
     } catch (error) {
         console.error(
-            "Failed to send notification:",
+            "LexiLoop notification error:",
             error
         );
     }
-}
-
-async function handleBrowserStart() {
-    await ensureDailyAlarm();
-    await sendDailyNotification();
 }
 
 chrome.runtime.onInstalled.addListener(
@@ -167,7 +133,8 @@ chrome.runtime.onInstalled.addListener(
 
 chrome.runtime.onStartup.addListener(
     async () => {
-        await handleBrowserStart();
+        await ensureDailyAlarm();
+        await sendDailyNotification();
     }
 );
 
@@ -180,32 +147,5 @@ chrome.alarms.onAlarm.addListener(
         }
 
         await sendDailyNotification();
-    }
-);
-
-chrome.runtime.onMessage.addListener(
-    (message, sender, sendResponse) => {
-        if (
-            message?.type ===
-            "GET_DUE_COUNT"
-        ) {
-            getDueWordCount()
-                .then((count) => {
-                    sendResponse({
-                        success: true,
-                        count
-                    });
-                })
-                .catch((error) => {
-                    console.error(error);
-
-                    sendResponse({
-                        success: false,
-                        count: 0
-                    });
-                });
-
-            return true;
-        }
     }
 );

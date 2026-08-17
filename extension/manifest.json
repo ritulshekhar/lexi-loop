@@ -1,15 +1,16 @@
 {
     "manifest_version": 3,
     "name": "LexiLoop",
-    "version": "0.5.0",
-    "description": "Build practical English vocabulary with adaptive learning, spaced repetition, and progress analytics.",
+    "version": "1.0.0",
+    "description": "Your AI-powered professional English vocabulary coach.",
     "permissions": [
         "storage",
         "alarms",
         "notifications"
     ],
     "host_permissions": [
-        "<all_urls>"
+        "<all_urls>",
+        "http://localhost:8000/*"
     ],
     "background": {
         "service_worker": "background.js"

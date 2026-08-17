@@ -1,80 +1,62 @@
 # LexiLoop
 
-LexiLoop is a Chrome extension designed to help users build practical English vocabulary through daily learning, spaced repetition, adaptive revision, contextual browser reminders, and learning analytics.
+LexiLoop is an AI-powered Chrome extension for building practical professional English vocabulary.
 
-## V0.5 Features
+The project combines:
 
-V0.5 introduces the progress dashboard.
+- Daily vocabulary learning
+- Synonyms and antonyms
+- Workplace examples
+- Spaced repetition
+- Adaptive mastery
+- Personalized revision
+- Browser reminders
+- Progress analytics
+- AI-generated lessons
+- AI phrase explanations
+- US/UK English preference
 
-### Daily vocabulary
+## Version Roadmap
 
-- Three new words per day
-- Meaning
-- Pronunciation
-- Part of speech
-- Synonym
-- Antonym
-- Four example sentences
+### V0.1
+Core vocabulary extension
 
-### Adaptive learning
+### V0.2
+Revision and spaced repetition
 
-Every learned word receives a mastery score from 0 to 100.
+### V0.2.1
+Developer test mode
 
-Revision performance changes:
+### V0.3
+Chrome notifications and contextual browser revision
 
-- Mastery score
-- Learning status
-- Next revision interval
-- Revision priority
+### V0.4
+Adaptive mastery and personalized revision
 
-### Progress dashboard
+### V0.5
+Progress dashboard and analytics
 
-The extension now tracks:
-
-- Total words learned
-- Total mastered words
-- Total revisions
-- Revision accuracy
-- Current learning streak
-- Number of active learning days
-- Average mastery
-
-### Mastery distribution
-
-Vocabulary is grouped into:
-
-- Learning
-- Familiar
-- Mastered
-
-### Weakest words
-
-LexiLoop displays the user's lowest-scoring vocabulary so the user can focus on words that need more attention.
-
-### Strongest words
-
-The dashboard also displays the user's highest-scoring vocabulary.
-
-### Recent vocabulary
-
-Recently studied words are displayed with their latest activity date.
-
-## Learning streak
-
-A day is considered active when the user learns a new word or completes a revision.
-
-The streak counts consecutive active calendar days.
+### V1.0
+AI-powered personalized vocabulary coach
 
 ## Project Structure
 
 ```text
 LexiLoop/
-├── manifest.json
-├── background.js
-├── popup.html
-├── popup.css
-├── popup.js
-├── content.js
-├── content.css
-├── words.js
+├── extension/
+│   ├── manifest.json
+│   ├── background.js
+│   ├── popup.html
+│   ├── popup.css
+│   ├── popup.js
+│   ├── content.js
+│   ├── content.css
+│   └── words.js
+│
+├── backend/
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── .gitignore
+│
 └── README.md

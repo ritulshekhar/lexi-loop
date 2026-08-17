@@ -1,11 +1,3 @@
-const CONTENT_STORAGE_KEYS = {
-    lastPromptTime:
-        "lastContextPromptTime",
-
-    dismissedDate:
-        "contextPromptDismissedDate"
-};
-
 const PROMPT_COOLDOWN =
     30 * 60 * 1000;
 
@@ -18,9 +10,7 @@ let pageStartedAt =
 let promptShown =
     false;
 
-function getDateKey(
-    date = new Date()
-) {
+function getDateKey(date = new Date()) {
     const year =
         date.getFullYear();
 
@@ -54,67 +44,37 @@ function getDueWords(
     const today =
         getDateKey();
 
-    return WORDS
+    return Object.values(progress)
         .filter(
-            (word) => {
-                const item =
-                    progress[word.word];
-
-                return (
-                    item &&
-                    item.dueDate &&
-                    item.dueDate <= today
-                );
-            }
+            (item) =>
+                item.dueDate &&
+                item.dueDate <= today
         )
         .sort(
-            (a, b) => {
-                const aScore =
-                    progress[a.word]
-                        ?.masteryScore || 0;
-
-                const bScore =
-                    progress[b.word]
-                        ?.masteryScore || 0;
-
-                return (
-                    aScore -
-                    bScore
-                );
-            }
+            (a, b) =>
+                (a.masteryScore || 0) -
+                (b.masteryScore || 0)
         );
 }
 
 async function canShowPrompt() {
     const result =
         await chrome.storage.local.get([
-            CONTENT_STORAGE_KEYS.lastPromptTime,
-            CONTENT_STORAGE_KEYS.dismissedDate
+            "lastContextPromptTime",
+            "contextPromptDismissedDate"
         ]);
 
-    const lastPromptTime =
-        result[
-        CONTENT_STORAGE_KEYS.lastPromptTime
-        ];
-
-    const dismissedDate =
-        result[
-        CONTENT_STORAGE_KEYS.dismissedDate
-        ];
-
-    const today =
-        getDateKey();
-
     if (
-        dismissedDate === today
+        result.contextPromptDismissedDate ===
+        getDateKey()
     ) {
         return false;
     }
 
     if (
-        lastPromptTime &&
+        result.lastContextPromptTime &&
         Date.now() -
-        lastPromptTime <
+        result.lastContextPromptTime <
         PROMPT_COOLDOWN
     ) {
         return false;
@@ -123,10 +83,26 @@ async function canShowPrompt() {
     return true;
 }
 
+function escapeHtml(
+    value
+) {
+    const div =
+        document.createElement(
+            "div"
+        );
+
+    div.textContent =
+        value;
+
+    return div.innerHTML;
+}
+
 function createPrompt(
     word
 ) {
-    if (promptShown) {
+    if (
+        promptShown
+    ) {
         return;
     }
 
@@ -159,7 +135,6 @@ function createPrompt(
 
         <button
           class="lexiloop-close"
-          aria-label="Dismiss"
         >
           ×
         </button>
@@ -180,7 +155,6 @@ function createPrompt(
         id="lexiloop-answer"
         class="lexiloop-answer"
       >
-
         <div class="lexiloop-answer-meaning">
           ${escapeHtml(
         word.meaning
@@ -204,7 +178,6 @@ function createPrompt(
     )}
           </strong>
         </div>
-
       </div>
 
       <div class="lexiloop-actions">
@@ -232,64 +205,55 @@ function createPrompt(
         wrapper
     );
 
-    const closeButton =
-        wrapper.querySelector(
+    wrapper
+        .querySelector(
             ".lexiloop-close"
+        )
+        .addEventListener(
+            "click",
+            () => {
+                dismissPrompt();
+            }
         );
 
-    const revealButton =
-        wrapper.querySelector(
-            "#lexiloop-reveal"
-        );
-
-    const dismissButton =
-        wrapper.querySelector(
+    wrapper
+        .querySelector(
             "#lexiloop-dismiss"
+        )
+        .addEventListener(
+            "click",
+            () => {
+                dismissPrompt();
+            }
         );
 
-    const answer =
-        wrapper.querySelector(
-            "#lexiloop-answer"
+    wrapper
+        .querySelector(
+            "#lexiloop-reveal"
+        )
+        .addEventListener(
+            "click",
+            () => {
+                const answer =
+                    wrapper.querySelector(
+                        "#lexiloop-answer"
+                    );
+
+                answer.classList.add(
+                    "visible"
+                );
+            }
         );
-
-    closeButton.addEventListener(
-        "click",
-        async () => {
-            await dismissPrompt();
-        }
-    );
-
-    revealButton.addEventListener(
-        "click",
-        () => {
-            answer.classList.add(
-                "visible"
-            );
-
-            revealButton.textContent =
-                "Answer Revealed";
-
-            revealButton.disabled =
-                true;
-        }
-    );
-
-    dismissButton.addEventListener(
-        "click",
-        async () => {
-            await dismissPrompt();
-        }
-    );
 
     chrome.storage.local.set({
-        [CONTENT_STORAGE_KEYS.lastPromptTime]:
+        lastContextPromptTime:
             Date.now()
     });
 }
 
 async function dismissPrompt() {
     await chrome.storage.local.set({
-        [CONTENT_STORAGE_KEYS.dismissedDate]:
+        contextPromptDismissedDate:
             getDateKey()
     });
 
@@ -310,22 +274,10 @@ function removePrompt() {
         false;
 }
 
-function escapeHtml(
-    value
-) {
-    const div =
-        document.createElement(
-            "div"
-        );
-
-    div.textContent =
-        value;
-
-    return div.innerHTML;
-}
-
 async function maybeShowPrompt() {
-    if (promptShown) {
+    if (
+        promptShown
+    ) {
         return;
     }
 
@@ -345,54 +297,35 @@ async function maybeShowPrompt() {
         return;
     }
 
-    const canShow =
-        await canShowPrompt();
-
-    if (!canShow) {
+    if (
+        !(await canShowPrompt())
+    ) {
         return;
     }
 
     const progress =
         await getProgress();
 
-    const dueWords =
+    const due =
         getDueWords(
             progress
         );
 
-    if (
-        dueWords.length === 0
-    ) {
+    if (!due.length) {
         return;
     }
 
     createPrompt(
-        dueWords[0]
+        due[0]
     );
 }
 
-async function initialize() {
-    if (!document.body) {
-        return;
-    }
-
+function initialize() {
     setTimeout(
         maybeShowPrompt,
         MIN_PAGE_TIME
     );
 }
-
-document.addEventListener(
-    "visibilitychange",
-    () => {
-        if (
-            document.visibilityState ===
-            "visible"
-        ) {
-            maybeShowPrompt();
-        }
-    }
-);
 
 if (
     document.readyState ===
