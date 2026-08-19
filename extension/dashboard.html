@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LexiLoop — Progress</title>
+
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+
+    <main class="dashboard">
+
+        <header class="dashboard-header">
+
+            <div>
+                <div class="brand">
+                    LexiLoop
+                </div>
+
+                <div class="subtitle">
+                    Your vocabulary progress
+                </div>
+            </div>
+
+            <div id="date" class="date"></div>
+
+        </header>
+
+        <section class="hero-card">
+
+            <div class="hero-label">
+                YOUR PROGRESS
+            </div>
+
+            <div id="average-mastery" class="hero-score">
+                —
+            </div>
+
+            <div class="hero-caption">
+                Average mastery
+            </div>
+
+            <div class="hero-stats">
+
+                <div>
+                    <strong id="total-words">
+                        0
+                    </strong>
+
+                    <span>
+                        Words learned
+                    </span>
+                </div>
+
+                <div>
+                    <strong id="mastered-words">
+                        0
+                    </strong>
+
+                    <span>
+                        Mastered
+                    </span>
+                </div>
+
+                <div>
+                    <strong id="total-reviews">
+                        0
+                    </strong>
+
+                    <span>
+                        Revisions
+                    </span>
+                </div>
+
+                <div>
+                    <strong id="accuracy">
+                        —
+                    </strong>
+
+                    <span>
+                        Accuracy
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="dashboard-grid">
+
+            <div class="card streak-card">
+
+                <div class="card-label">
+                    CONSISTENCY
+                </div>
+
+                <div class="streak-main">
+
+                    <strong id="streak">
+                        0
+                    </strong>
+
+                    <span>
+                        day streak
+                    </span>
+
+                </div>
+
+                <div class="secondary-stat">
+                    <strong id="active-days">
+                        0
+                    </strong>
+
+                    active days
+                </div>
+
+            </div>
+
+            <div class="card distribution-card">
+
+                <div class="card-label">
+                    MASTERY DISTRIBUTION
+                </div>
+
+                <div class="distribution-row">
+
+                    <span>
+                        Learning
+                    </span>
+
+                    <strong id="learning-count">
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="distribution-track">
+                    <div id="learning-fill" class="distribution-fill learning"></div>
+                </div>
+
+                <div class="distribution-row">
+
+                    <span>
+                        Familiar
+                    </span>
+
+                    <strong id="familiar-count">
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="distribution-track">
+                    <div id="familiar-fill" class="distribution-fill familiar"></div>
+                </div>
+
+                <div class="distribution-row">
+
+                    <span>
+                        Mastered
+                    </span>
+
+                    <strong id="mastered-count">
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="distribution-track">
+                    <div id="mastered-fill" class="distribution-fill mastered"></div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="section-header">
+
+                <div>
+                    <div class="card-label">
+                        NEEDS PRACTICE
+                    </div>
+
+                    <h2>
+                        Your weakest words
+                    </h2>
+                </div>
+
+            </div>
+
+            <div id="weakest-container" class="word-list"></div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="section-header">
+
+                <div>
+                    <div class="card-label">
+                        STRONGEST
+                    </div>
+
+                    <h2>
+                        Words you know well
+                    </h2>
+                </div>
+
+            </div>
+
+            <div id="strongest-container" class="word-list"></div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="section-header">
+
+                <div>
+                    <div class="card-label">
+                        RECENT ACTIVITY
+                    </div>
+
+                    <h2>
+                        Recently reviewed
+                    </h2>
+                </div>
+
+            </div>
+
+            <div id="recent-container" class="recent-list"></div>
+
+        </section>
+
+        <footer>
+            LexiLoop • Build vocabulary that sticks
+        </footer>
+
+    </main>
+
+    <script src="words.js"></script>
+    <script src="dashboard.js"></script>
+
+</body>
+
+</html>

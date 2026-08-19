@@ -23,439 +23,113 @@
                 </div>
 
                 <div class="subtitle">
-                    Your AI vocabulary coach
+                    Your daily vocabulary loop
                 </div>
             </div>
 
-            <div class="date" id="date"></div>
+            <div id="date" class="date"></div>
 
         </header>
 
-        <nav class="tabs">
+        <section class="quick-stats">
 
-            <button class="tab active" data-tab="today">
-                Today
-            </button>
+            <div class="quick-stat">
+                <strong id="new-count">
+                    0/3
+                </strong>
 
-            <button class="tab" data-tab="coach">
-                AI Coach
-            </button>
+                <span>
+                    learned
+                </span>
+            </div>
 
-            <button class="tab" data-tab="progress">
-                Progress
-            </button>
+            <div class="quick-stat">
+                <strong id="due-count">
+                    0
+                </strong>
 
-        </nav>
+                <span>
+                    due
+                </span>
+            </div>
 
-        <section id="today-tab" class="tab-content active">
+            <div class="quick-stat">
+                <strong id="mastery-score">
+                    —
+                </strong>
 
-            <section class="stats-card">
+                <span>
+                    mastery
+                </span>
+            </div>
 
-                <div class="stat">
-                    <span class="stat-value" id="new-count">
-                        0/3
-                    </span>
+            <div class="quick-stat">
+                <strong id="streak">
+                    0
+                </strong>
 
-                    <span class="stat-label">
-                        new words
-                    </span>
-                </div>
-
-                <div class="stat-divider"></div>
-
-                <div class="stat">
-                    <span class="stat-value" id="due-count">
-                        0
-                    </span>
-
-                    <span class="stat-label">
-                        due today
-                    </span>
-                </div>
-
-                <div class="stat-divider"></div>
-
-                <div class="stat">
-                    <span class="stat-value" id="mastery-score">
-                        —
-                    </span>
-
-                    <span class="stat-label">
-                        avg. mastery
-                    </span>
-                </div>
-
-            </section>
-
-            <section class="progress-section">
-
-                <div class="progress-top">
-                    <span>
-                        Today's progress
-                    </span>
-
-                    <span id="progress-text">
-                        0/3 new words
-                    </span>
-                </div>
-
-                <div class="progress-track">
-
-                    <div class="progress-bar" id="progress-bar"></div>
-
-                </div>
-
-            </section>
-
-            <section id="completion-message" class="completion-message hidden">
-                Nice work. Today's learning is complete.
-            </section>
-
-            <section id="revision-section" class="section hidden">
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <span class="section-label">
-                            PERSONALIZED REVISION
-                        </span>
-
-                        <h2>
-                            Words due today
-                        </h2>
-
-                    </div>
-
-                    <span class="section-count" id="revision-count">
-                        0
-                    </span>
-
-                </div>
-
-                <div id="revision-container" class="revision-container"></div>
-
-            </section>
-
-            <section class="section">
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <span class="section-label">
-                            TODAY'S VOCABULARY
-                        </span>
-
-                        <h2>
-                            Your 3 words
-                        </h2>
-
-                    </div>
-
-                </div>
-
-                <div id="words-container" class="words-container"></div>
-
-            </section>
+                <span>
+                    day streak
+                </span>
+            </div>
 
         </section>
 
-        <section id="coach-tab" class="tab-content">
+        <section class="section">
 
-            <section class="coach-card">
+            <div class="section-heading">
 
-                <div class="section-label">
-                    AI VOCABULARY COACH
+                <div>
+                    <span class="section-label">
+                        TODAY
+                    </span>
+
+                    <h2>
+                        Your 3 words
+                    </h2>
                 </div>
 
-                <h2>
-                    Personalize today's lesson
-                </h2>
+                <span id="progress-text" class="progress-text">
+                    0/3
+                </span>
 
-                <p class="coach-description">
-                    Tell LexiLoop what kind of English you want to improve.
-                </p>
+            </div>
 
-                <label class="field-label">
-                    English variant
-                </label>
-
-                <select id="variant-select" class="field">
-                    <option value="global">
-                        Global English
-                    </option>
-
-                    <option value="us">
-                        US English
-                    </option>
-
-                    <option value="uk">
-                        UK English
-                    </option>
-                </select>
-
-                <label class="field-label">
-                    Learning focus
-                </label>
-
-                <select id="focus-select" class="field">
-                    <option value="mixed">
-                        Mixed professional
-                    </option>
-
-                    <option value="business">
-                        Business
-                    </option>
-
-                    <option value="client">
-                        Client communication
-                    </option>
-
-                    <option value="meetings">
-                        Meetings
-                    </option>
-
-                    <option value="technology">
-                        Technology
-                    </option>
-
-                    <option value="workplace">
-                        General workplace
-                    </option>
-                </select>
-
-                <label class="field-label">
-                    Difficulty
-                </label>
-
-                <select id="difficulty-select" class="field">
-                    <option value="intermediate">
-                        Intermediate
-                    </option>
-
-                    <option value="advanced">
-                        Advanced
-                    </option>
-
-                    <option value="expert">
-                        Advanced professional
-                    </option>
-                </select>
-
-                <button id="generate-lesson" class="primary-button">
-                    Generate AI lesson
-                </button>
-
-                <div id="lesson-status" class="lesson-status hidden"></div>
-
-                <div id="ai-lesson" class="ai-lesson hidden"></div>
-
-            </section>
-
-            <section class="coach-card">
-
-                <div class="section-label">
-                    PHRASE EXPLAINER
-                </div>
-
-                <h2>
-                    What did they mean?
-                </h2>
-
-                <p class="coach-description">
-                    Enter a word or phrase you heard in a meeting.
-                </p>
-
-                <input id="phrase-input" class="field" type="text" placeholder="e.g. circle back">
-
-                <button id="explain-phrase" class="secondary-button">
-                    Explain with AI
-                </button>
-
-                <div id="phrase-result" class="phrase-result hidden"></div>
-
-            </section>
+            <div id="words-container" class="words-container"></div>
 
         </section>
 
-        <section id="progress-tab" class="tab-content">
+        <section id="revision-section" class="section hidden">
 
-            <section class="dashboard-section">
+            <div class="section-heading">
 
-                <div class="section-label">
-                    YOUR PROGRESS
+                <div>
+                    <span class="section-label">
+                        REVISION
+                    </span>
+
+                    <h2>
+                        Due now
+                    </h2>
                 </div>
 
-                <h2>
-                    Learning overview
-                </h2>
+                <span id="revision-count" class="count-badge">
+                    0
+                </span>
 
-                <div class="dashboard-stats">
+            </div>
 
-                    <div class="dashboard-stat">
-                        <span class="dashboard-value" id="total-words">
-                            0
-                        </span>
-
-                        <span class="dashboard-label">
-                            Words learned
-                        </span>
-                    </div>
-
-                    <div class="dashboard-stat">
-                        <span class="dashboard-value" id="mastered-words">
-                            0
-                        </span>
-
-                        <span class="dashboard-label">
-                            Mastered
-                        </span>
-                    </div>
-
-                    <div class="dashboard-stat">
-                        <span class="dashboard-value" id="total-reviews">
-                            0
-                        </span>
-
-                        <span class="dashboard-label">
-                            Revisions
-                        </span>
-                    </div>
-
-                    <div class="dashboard-stat">
-                        <span class="dashboard-value" id="accuracy">
-                            —
-                        </span>
-
-                        <span class="dashboard-label">
-                            Accuracy
-                        </span>
-                    </div>
-
-                    <div class="dashboard-stat">
-                        <span class="dashboard-value" id="streak">
-                            0
-                        </span>
-
-                        <span class="dashboard-label">
-                            Day streak
-                        </span>
-                    </div>
-
-                    <div class="dashboard-stat">
-                        <span class="dashboard-value" id="active-days">
-                            0
-                        </span>
-
-                        <span class="dashboard-label">
-                            Active days
-                        </span>
-                    </div>
-
-                </div>
-
-            </section>
-
-            <section class="dashboard-section">
-
-                <div class="section-label">
-                    MASTERY
-                </div>
-
-                <h2>
-                    Vocabulary distribution
-                </h2>
-
-                <div class="mastery-card">
-
-                    <div class="mastery-row">
-
-                        <div class="mastery-row-top">
-                            <span>
-                                Learning
-                            </span>
-
-                            <span id="learning-count">
-                                0
-                            </span>
-                        </div>
-
-                        <div class="distribution-track">
-                            <div id="learning-fill" class="distribution-fill learning-fill"></div>
-                        </div>
-
-                    </div>
-
-                    <div class="mastery-row">
-
-                        <div class="mastery-row-top">
-                            <span>
-                                Familiar
-                            </span>
-
-                            <span id="familiar-count">
-                                0
-                            </span>
-                        </div>
-
-                        <div class="distribution-track">
-                            <div id="familiar-fill" class="distribution-fill familiar-fill"></div>
-                        </div>
-
-                    </div>
-
-                    <div class="mastery-row">
-
-                        <div class="mastery-row-top">
-                            <span>
-                                Mastered
-                            </span>
-
-                            <span id="mastered-count">
-                                0
-                            </span>
-                        </div>
-
-                        <div class="distribution-track">
-                            <div id="mastered-fill" class="distribution-fill mastered-fill"></div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-            <section class="dashboard-section">
-
-                <div class="section-label">
-                    NEEDS PRACTICE
-                </div>
-
-                <h2>
-                    Your weakest words
-                </h2>
-
-                <div id="weakest-container" class="analytics-list"></div>
-
-            </section>
-
-            <section class="dashboard-section">
-
-                <div class="section-label">
-                    STRONGEST
-                </div>
-
-                <h2>
-                    Words you know well
-                </h2>
-
-                <div id="strongest-container" class="analytics-list"></div>
-
-            </section>
+            <div id="revision-container" class="revision-container"></div>
 
         </section>
+
+        <section id="completion-message" class="completion-message hidden">
+            Today's vocabulary is complete ✓
+        </section>
+
+        <button id="open-dashboard" class="dashboard-button">
+            View detailed progress
+        </button>
 
         <footer class="footer">
             3 words a day • Build vocabulary that sticks
@@ -464,6 +138,7 @@
     </main>
 
     <script src="words.js"></script>
+    <script src="vocabulary.js"></script>
     <script src="popup.js"></script>
 
 </body>
