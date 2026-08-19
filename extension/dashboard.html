@@ -34,7 +34,7 @@
         <section class="hero-card">
 
             <div class="hero-label">
-                YOUR PROGRESS
+                AVERAGE MASTERY
             </div>
 
             <div id="average-mastery" class="hero-score">
@@ -42,93 +42,88 @@
             </div>
 
             <div class="hero-caption">
-                Average mastery
-            </div>
-
-            <div class="hero-stats">
-
-                <div>
-                    <strong id="total-words">
-                        0
-                    </strong>
-
-                    <span>
-                        Words learned
-                    </span>
-                </div>
-
-                <div>
-                    <strong id="mastered-words">
-                        0
-                    </strong>
-
-                    <span>
-                        Mastered
-                    </span>
-                </div>
-
-                <div>
-                    <strong id="total-reviews">
-                        0
-                    </strong>
-
-                    <span>
-                        Revisions
-                    </span>
-                </div>
-
-                <div>
-                    <strong id="accuracy">
-                        —
-                    </strong>
-
-                    <span>
-                        Accuracy
-                    </span>
-                </div>
-
+                Across your learned vocabulary
             </div>
 
         </section>
 
-        <section class="dashboard-grid">
+        <section class="stats-grid">
 
-            <div class="card streak-card">
+            <div class="stat-card">
+                <strong id="total-words">
+                    0
+                </strong>
 
-                <div class="card-label">
-                    CONSISTENCY
-                </div>
-
-                <div class="streak-main">
-
-                    <strong id="streak">
-                        0
-                    </strong>
-
-                    <span>
-                        day streak
-                    </span>
-
-                </div>
-
-                <div class="secondary-stat">
-                    <strong id="active-days">
-                        0
-                    </strong>
-
-                    active days
-                </div>
-
+                <span>
+                    Words learned
+                </span>
             </div>
 
-            <div class="card distribution-card">
+            <div class="stat-card">
+                <strong id="mastered-words">
+                    0
+                </strong>
 
-                <div class="card-label">
-                    MASTERY DISTRIBUTION
-                </div>
+                <span>
+                    Mastered
+                </span>
+            </div>
 
-                <div class="distribution-row">
+            <div class="stat-card">
+                <strong id="total-reviews">
+                    0
+                </strong>
 
+                <span>
+                    Revisions
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <strong id="accuracy">
+                    —
+                </strong>
+
+                <span>
+                    Accuracy
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <strong id="streak">
+                    0
+                </strong>
+
+                <span>
+                    Day streak
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <strong id="active-days">
+                    0
+                </strong>
+
+                <span>
+                    Active days
+                </span>
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="section-label">
+                MASTERY DISTRIBUTION
+            </div>
+
+            <h2>
+                Your vocabulary
+            </h2>
+
+            <div class="distribution-row">
+
+                <div class="distribution-label">
                     <span>
                         Learning
                     </span>
@@ -136,15 +131,17 @@
                     <strong id="learning-count">
                         0
                     </strong>
-
                 </div>
 
                 <div class="distribution-track">
                     <div id="learning-fill" class="distribution-fill learning"></div>
                 </div>
 
-                <div class="distribution-row">
+            </div>
 
+            <div class="distribution-row">
+
+                <div class="distribution-label">
                     <span>
                         Familiar
                     </span>
@@ -152,15 +149,17 @@
                     <strong id="familiar-count">
                         0
                     </strong>
-
                 </div>
 
                 <div class="distribution-track">
                     <div id="familiar-fill" class="distribution-fill familiar"></div>
                 </div>
 
-                <div class="distribution-row">
+            </div>
 
+            <div class="distribution-row">
+
+                <div class="distribution-label">
                     <span>
                         Mastered
                     </span>
@@ -168,7 +167,6 @@
                     <strong id="mastered-count">
                         0
                     </strong>
-
                 </div>
 
                 <div class="distribution-track">
@@ -181,19 +179,13 @@
 
         <section class="card">
 
-            <div class="section-header">
-
-                <div>
-                    <div class="card-label">
-                        NEEDS PRACTICE
-                    </div>
-
-                    <h2>
-                        Your weakest words
-                    </h2>
-                </div>
-
+            <div class="section-label">
+                NEEDS PRACTICE
             </div>
+
+            <h2>
+                Your weakest words
+            </h2>
 
             <div id="weakest-container" class="word-list"></div>
 
@@ -201,19 +193,13 @@
 
         <section class="card">
 
-            <div class="section-header">
-
-                <div>
-                    <div class="card-label">
-                        STRONGEST
-                    </div>
-
-                    <h2>
-                        Words you know well
-                    </h2>
-                </div>
-
+            <div class="section-label">
+                STRONGEST
             </div>
+
+            <h2>
+                Words you know well
+            </h2>
 
             <div id="strongest-container" class="word-list"></div>
 
@@ -221,19 +207,13 @@
 
         <section class="card">
 
-            <div class="section-header">
-
-                <div>
-                    <div class="card-label">
-                        RECENT ACTIVITY
-                    </div>
-
-                    <h2>
-                        Recently reviewed
-                    </h2>
-                </div>
-
+            <div class="section-label">
+                RECENT ACTIVITY
             </div>
+
+            <h2>
+                Recently reviewed
+            </h2>
 
             <div id="recent-container" class="recent-list"></div>
 

@@ -1,6 +1,9 @@
 const STORAGE_KEYS = {
-    wordProgress: "wordProgress",
-    activityHistory: "activityHistory"
+    wordProgress:
+        "wordProgress",
+
+    activityHistory:
+        "activityHistory"
 };
 
 function getDateKey(
@@ -37,9 +40,7 @@ function getFormattedDate() {
             day: "numeric",
             year: "numeric"
         }
-    ).format(
-        new Date()
-    );
+    ).format(new Date());
 }
 
 async function getProgress() {
@@ -128,9 +129,7 @@ function calculateStreak(
     }
 
     const dates =
-        new Set(
-            history
-        );
+        new Set(history);
 
     let cursor =
         new Date();
@@ -139,9 +138,7 @@ function calculateStreak(
 
     while (
         dates.has(
-            getDateKey(
-                cursor
-            )
+            getDateKey(cursor)
         )
     ) {
         streak += 1;
@@ -154,7 +151,7 @@ function calculateStreak(
     return streak;
 }
 
-function renderList(
+function renderWordList(
     containerId,
     items,
     emptyText
@@ -167,9 +164,7 @@ function renderList(
     container.innerHTML =
         "";
 
-    if (
-        items.length === 0
-    ) {
+    if (!items.length) {
         const empty =
             document.createElement(
                 "div"
@@ -251,25 +246,13 @@ function renderList(
             score.textContent =
                 `${item.score}%`;
 
-            right.appendChild(
-                bar
-            );
+            right.appendChild(bar);
+            right.appendChild(score);
 
-            right.appendChild(
-                score
-            );
+            row.appendChild(name);
+            row.appendChild(right);
 
-            row.appendChild(
-                name
-            );
-
-            row.appendChild(
-                right
-            );
-
-            container.appendChild(
-                row
-            );
+            container.appendChild(row);
         }
     );
 }
@@ -299,9 +282,7 @@ function formatDate(
 
     if (
         dateKey ===
-        getDateKey(
-            yesterday
-        )
+        getDateKey(yesterday)
     ) {
         return "Yesterday";
     }
@@ -351,9 +332,7 @@ function renderRecent(
                 10
             );
 
-    if (
-        recent.length === 0
-    ) {
+    if (!recent.length) {
         const empty =
             document.createElement(
                 "div"
@@ -363,7 +342,7 @@ function renderRecent(
             "empty-state";
 
         empty.textContent =
-            "Your recent revisions will appear here.";
+            "Your revision history will appear here.";
 
         container.appendChild(
             empty
@@ -406,17 +385,10 @@ function renderRecent(
                     item.lastReviewed
                 );
 
-            row.appendChild(
-                word
-            );
+            row.appendChild(word);
+            row.appendChild(date);
 
-            row.appendChild(
-                date
-            );
-
-            container.appendChild(
-                row
-            );
+            container.appendChild(row);
         }
     );
 }
@@ -429,9 +401,7 @@ async function render() {
         await getActivityHistory();
 
     const entries =
-        Object.values(
-            progress
-        );
+        Object.values(progress);
 
     const totalWords =
         entries.length;
@@ -584,7 +554,7 @@ async function render() {
             })
         );
 
-    renderList(
+    renderWordList(
         "weakest-container",
         [...scored]
             .sort(
@@ -592,14 +562,11 @@ async function render() {
                     a.score -
                     b.score
             )
-            .slice(
-                0,
-                7
-            ),
-        "Your weakest words will appear here as you build your vocabulary."
+            .slice(0, 7),
+        "Your weakest words will appear here as you learn more vocabulary."
     );
 
-    renderList(
+    renderWordList(
         "strongest-container",
         [...scored]
             .sort(
@@ -607,16 +574,11 @@ async function render() {
                     b.score -
                     a.score
             )
-            .slice(
-                0,
-                7
-            ),
+            .slice(0, 7),
         "Your strongest words will appear here as you build mastery."
     );
 
-    renderRecent(
-        entries
-    );
+    renderRecent(entries);
 }
 
 document.addEventListener(
