@@ -119,7 +119,6 @@ const PROFESSIONAL_WORDS = new Set([
     "highlight",
     "demonstrate",
     "elaborate",
-    "discuss",
     "confirm",
     "escalate",
     "collaborate",
@@ -139,7 +138,6 @@ const PROFESSIONAL_PATTERNS = [
     "ive",
     "ity",
     "ical",
-    "al",
     "ary",
     "ory",
     "ous",
@@ -306,18 +304,14 @@ function scoreCandidate(word) {
         score += 2;
     }
 
-    if (
-        normalized.length >= 11
-    ) {
+    if (normalized.length >= 11) {
         score += 1;
     }
 
     PROFESSIONAL_PATTERNS.forEach(
         (pattern) => {
             if (
-                normalized.endsWith(
-                    pattern
-                )
+                normalized.endsWith(pattern)
             ) {
                 score += 1;
             }
@@ -375,9 +369,7 @@ function normalizeDictionaryData(data) {
     const firstDefinition =
         definitions[0];
 
-    if (
-        !firstDefinition.definition
-    ) {
+    if (!firstDefinition.definition) {
         return null;
     }
 
@@ -424,22 +416,16 @@ function normalizeDictionaryData(data) {
 
     return {
         word: entry.word,
-
         pronunciation,
-
         partOfSpeech:
             firstMeaning.partOfSpeech ||
             "word",
-
         meaning:
             firstDefinition.definition,
-
         synonym:
             synonyms[0] || "—",
-
         antonym:
             antonyms[0] || "—",
-
         examples:
             examples.length > 0
                 ? examples.slice(0, 4)
@@ -449,7 +435,6 @@ function normalizeDictionaryData(data) {
                     `The word appeared in a professional conversation.`,
                     `This is useful vocabulary for workplace communication.`
                 ],
-
         source: "dictionary"
     };
 }
@@ -483,13 +468,9 @@ function normalizeWiktionaryData(
             requestedWord
         );
 
-    let partOfSpeech =
-        "word";
-
+    let partOfSpeech = "word";
     let meaning = "";
-
     let pronunciation = "";
-
     let example = "";
 
     if (
@@ -562,19 +543,11 @@ function normalizeWiktionaryData(
         word:
             entry.word ||
             requested,
-
         pronunciation,
-
         partOfSpeech,
-
         meaning,
-
-        synonym:
-            "—",
-
-        antonym:
-            "—",
-
+        synonym: "—",
+        antonym: "—",
         examples:
             example
                 ? [
@@ -589,7 +562,6 @@ function normalizeWiktionaryData(
                     `Try using "${requested}" in a sentence of your own.`,
                     `Review "${requested}" during your next revision.`
                 ],
-
         source: "wiktionary"
     };
 }
@@ -617,9 +589,7 @@ async function saveVocabularyCache(
 
     await chrome.storage.local.set({
         [VOCABULARY_CACHE_KEY]:
-            Object.fromEntries(
-                entries
-            )
+            Object.fromEntries(entries)
     });
 }
 
@@ -1004,32 +974,41 @@ async function getWordsForToday(
             progress
         );
 
-    const unseen =
+    const candidates =
         vocabulary
             .filter(
-                (word) =>
-                    !progress[
-                    word.word
-                    ]
+                (word) => {
+                    const saved =
+                        progress[word.word];
+
+                    if (saved) {
+                        return false;
+                    }
+
+                    if (
+                        !word.word ||
+                        !word.meaning
+                    ) {
+                        return false;
+                    }
+
+                    return true;
+                }
             )
             .sort(
                 (a, b) =>
-                    scoreCandidate(
-                        b.word
-                    ) -
-                    scoreCandidate(
-                        a.word
-                    )
+                    scoreCandidate(b.word) -
+                    scoreCandidate(a.word)
             );
 
-    if (!unseen.length) {
+    if (!candidates.length) {
         return [];
     }
 
     if (
-        unseen.length <= count
+        candidates.length <= count
     ) {
-        return unseen;
+        return candidates;
     }
 
     const dayNumber =
@@ -1038,37 +1017,51 @@ async function getWordsForToday(
             86400000
         );
 
-    const batchSize =
+    const poolSize =
         Math.min(
-            12,
-            unseen.length
+            15,
+            candidates.length
         );
 
-    const batchStart =
+    const startIndex =
         (
             dayNumber * count
         ) %
-        batchSize;
+        poolSize;
 
-    return Array.from(
-        {
-            length: count
-        },
-        (_, index) =>
-            unseen[
+    const selected = [];
+
+    for (
+        let offset = 0;
+        offset < poolSize &&
+        selected.length < count;
+        offset++
+    ) {
+        const candidate =
+            candidates[
             (
-                batchStart +
-                index
+                startIndex +
+                offset
             ) %
-            batchSize
-            ]
-    );
+            poolSize
+            ];
+
+        if (
+            !selected.some(
+                (word) =>
+                    word.word ===
+                    candidate.word
+            )
+        ) {
+            selected.push(
+                candidate
+            );
+        }
+    }
+
+    return selected;
 }
 
-async function discoverWord(
-    word
-) {
-    return fetchWord(
-        word
-    );
+async function discoverWord(word) {
+    return fetchWord(word);
 }
