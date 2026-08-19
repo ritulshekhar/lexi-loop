@@ -2,7 +2,7 @@ const VOCABULARY_CACHE_KEY = "vocabularyCache";
 const DISCOVERY_CACHE_KEY = "discoveryCache";
 
 const VOCABULARY_CACHE_LIMIT = 500;
-const DISCOVERY_CACHE_LIMIT = 120;
+const DISCOVERY_CACHE_LIMIT = 150;
 
 const FALLBACK_WORDS = [
     "concise",
@@ -51,25 +51,166 @@ const DISCOVERY_SEEDS = [
     "technology",
     "presentation",
     "project",
-    "leadership"
+    "leadership",
+    "strategy",
+    "management",
+    "collaboration",
+    "negotiation",
+    "career"
 ];
 
-function isValidWordCandidate(word) {
-    if (!word) {
-        return false;
-    }
+const BLOCKED_CANDIDATES = new Set([
+    "biz",
+    "app",
+    "apps",
+    "web",
+    "tech",
+    "info",
+    "etc",
+    "ok",
+    "okay",
+    "yeah",
+    "yep",
+    "nope",
+    "gonna",
+    "wanna",
+    "gotta",
+    "kinda",
+    "sorta",
+    "thing",
+    "things",
+    "stuff",
+    "someone",
+    "something",
+    "anything",
+    "everything",
+    "nothing"
+]);
 
-    const normalized = String(word)
+const COMMON_FUNCTION_WORDS = new Set([
+    "about",
+    "after",
+    "again",
+    "against",
+    "almost",
+    "already",
+    "also",
+    "always",
+    "another",
+    "around",
+    "because",
+    "before",
+    "being",
+    "below",
+    "between",
+    "both",
+    "could",
+    "during",
+    "each",
+    "either",
+    "enough",
+    "every",
+    "from",
+    "further",
+    "having",
+    "here",
+    "into",
+    "itself",
+    "just",
+    "might",
+    "more",
+    "most",
+    "much",
+    "never",
+    "often",
+    "only",
+    "other",
+    "over",
+    "same",
+    "should",
+    "since",
+    "some",
+    "such",
+    "than",
+    "their",
+    "there",
+    "these",
+    "those",
+    "through",
+    "under",
+    "until",
+    "very",
+    "where",
+    "which",
+    "while",
+    "with",
+    "would",
+    "your"
+]);
+
+function normalizeCandidate(word) {
+    return String(word || "")
         .trim()
         .toLowerCase();
+}
 
-    if (normalized.length < 3) {
+function isValidWordCandidate(word) {
+    const normalized =
+        normalizeCandidate(word);
+
+    if (!normalized) {
         return false;
     }
 
-    return /^[a-z]+(?:'[a-z]+)?$/.test(
-        normalized
-    );
+    if (normalized.length < 5) {
+        return false;
+    }
+
+    if (normalized.length > 18) {
+        return false;
+    }
+
+    if (!/^[a-z]+(?:'[a-z]+)?$/.test(normalized)) {
+        return false;
+    }
+
+    if (BLOCKED_CANDIDATES.has(normalized)) {
+        return false;
+    }
+
+    if (COMMON_FUNCTION_WORDS.has(normalized)) {
+        return false;
+    }
+
+    return true;
+}
+
+function scoreCandidate(word) {
+    const normalized =
+        normalizeCandidate(word);
+
+    let score = 0;
+
+    if (normalized.length >= 6) {
+        score += 2;
+    }
+
+    if (normalized.length >= 8) {
+        score += 1;
+    }
+
+    if (
+        normalized.includes("able") ||
+        normalized.includes("ive") ||
+        normalized.includes("ous") ||
+        normalized.includes("ful") ||
+        normalized.includes("ment") ||
+        normalized.includes("tion")
+    ) {
+        score += 1;
+    }
+
+    return score;
 }
 
 function normalizeWordData(data) {
@@ -102,7 +243,14 @@ function normalizeWordData(data) {
         return null;
     }
 
-    const firstDefinition = definitions[0];
+    const firstDefinition =
+        definitions[0];
+
+    if (
+        !firstDefinition.definition
+    ) {
+        return null;
+    }
 
     const phonetics = Array.isArray(entry.phonetics)
         ? entry.phonetics
@@ -116,23 +264,28 @@ function normalizeWordData(data) {
         )?.text || "";
 
     const synonyms = definitions
-        .flatMap((item) =>
-            Array.isArray(item.synonyms)
-                ? item.synonyms
-                : []
+        .flatMap(
+            (item) =>
+                Array.isArray(item.synonyms)
+                    ? item.synonyms
+                    : []
         )
         .filter(Boolean);
 
     const antonyms = definitions
-        .flatMap((item) =>
-            Array.isArray(item.antonyms)
-                ? item.antonyms
-                : []
+        .flatMap(
+            (item) =>
+                Array.isArray(item.antonyms)
+                    ? item.antonyms
+                    : []
         )
         .filter(Boolean);
 
     const examples = definitions
-        .map((item) => item.example)
+        .map(
+            (item) =>
+                item.example
+        )
         .filter(Boolean);
 
     return {
@@ -180,9 +333,11 @@ async function getVocabularyCache() {
 }
 
 async function saveVocabularyCache(cache) {
-    const entries = Object.entries(cache).slice(
-        -VOCABULARY_CACHE_LIMIT
-    );
+    const entries =
+        Object.entries(cache)
+            .slice(
+                -VOCABULARY_CACHE_LIMIT
+            );
 
     await chrome.storage.local.set({
         [VOCABULARY_CACHE_KEY]:
@@ -192,13 +347,7 @@ async function saveVocabularyCache(cache) {
 
 async function fetchWord(word) {
     const normalizedWord =
-        String(word)
-            .trim()
-            .toLowerCase();
-
-    if (!normalizedWord) {
-        return null;
-    }
+        normalizeCandidate(word);
 
     if (
         !isValidWordCandidate(
@@ -233,7 +382,9 @@ async function fetchWord(word) {
             await response.json();
 
         const normalized =
-            normalizeWordData(data);
+            normalizeWordData(
+                data
+            );
 
         if (!normalized) {
             return null;
@@ -248,12 +399,6 @@ async function fetchWord(word) {
 
         return normalized;
     } catch (error) {
-        console.warn(
-            "Dictionary lookup failed:",
-            normalizedWord,
-            error
-        );
-
         return null;
     }
 }
@@ -275,10 +420,7 @@ async function saveDiscoveryCache(words) {
         ...new Set(
             words
                 .map(
-                    (word) =>
-                        String(word)
-                            .trim()
-                            .toLowerCase()
+                    normalizeCandidate
                 )
                 .filter(
                     isValidWordCandidate
@@ -305,7 +447,7 @@ async function discoverCandidateWords() {
         );
 
     if (
-        validExisting.length >= 30
+        validExisting.length >= 50
     ) {
         return validExisting;
     }
@@ -356,32 +498,45 @@ async function discoverCandidateWords() {
         } catch (error) {
             console.warn(
                 "Candidate discovery failed:",
-                seed,
-                error
+                seed
             );
         }
     }
 
-    const filtered = [
-        ...new Set(
-            discovered
-                .filter(
-                    isValidWordCandidate
-                )
-                .map(
-                    (word) =>
-                        word
-                            .trim()
-                            .toLowerCase()
-                )
-        )
-    ];
+    const ranked =
+        [
+            ...new Set(
+                discovered
+                    .map(
+                        normalizeCandidate
+                    )
+                    .filter(
+                        isValidWordCandidate
+                    )
+            )
+        ]
+            .map(
+                (word) => ({
+                    word,
+                    score:
+                        scoreCandidate(word)
+                })
+            )
+            .sort(
+                (a, b) =>
+                    b.score -
+                    a.score
+            )
+            .map(
+                (item) =>
+                    item.word
+            );
 
     await saveDiscoveryCache(
-        filtered
+        ranked
     );
 
-    return filtered;
+    return ranked;
 }
 
 function getFallbackWords() {
@@ -390,7 +545,8 @@ function getFallbackWords() {
             (word) =>
                 WORDS.find(
                     (item) =>
-                        item.word === word
+                        item.word ===
+                        word
                 )
         )
         .filter(Boolean);
@@ -407,9 +563,7 @@ async function buildDynamicVocabulary(
 
     const combined = [];
 
-    Object.values(
-        cache
-    ).forEach(
+    Object.values(cache).forEach(
         (word) => {
             if (
                 word &&
@@ -420,46 +574,36 @@ async function buildDynamicVocabulary(
         }
     );
 
-    let fetchedCount = 0;
-
-    for (
-        const candidate of candidates
-    ) {
-        const normalized =
-            candidate
-                .trim()
-                .toLowerCase();
-
-        if (
-            !isValidWordCandidate(
-                normalized
+    const candidatesToFetch =
+        candidates
+            .filter(
+                (candidate) =>
+                    !cache[
+                    normalizeCandidate(
+                        candidate
+                    )
+                    ]
             )
-        ) {
-            continue;
-        }
-
-        if (
-            cache[normalized]
-        ) {
-            continue;
-        }
-
-        const word =
-            await fetchWord(
-                normalized
+            .slice(
+                0,
+                20
             );
 
-        if (word) {
-            combined.push(word);
-            fetchedCount += 1;
-        }
+    const fetched =
+        await Promise.all(
+            candidatesToFetch.map(
+                (candidate) =>
+                    fetchWord(candidate)
+            )
+        );
 
-        if (
-            fetchedCount >= 15
-        ) {
-            break;
+    fetched.forEach(
+        (word) => {
+            if (word) {
+                combined.push(word);
+            }
         }
-    }
+    );
 
     getFallbackWords().forEach(
         (word) => {
@@ -477,8 +621,9 @@ async function buildDynamicVocabulary(
                 word.word
             ) {
                 unique.set(
-                    word.word
-                        .toLowerCase(),
+                    normalizeCandidate(
+                        word.word
+                    ),
                     word
                 );
             }
@@ -505,7 +650,9 @@ async function getWordsForToday(
                 !progress[word.word]
         );
 
-    if (!unseen.length) {
+    if (
+        unseen.length === 0
+    ) {
         return [];
     }
 
@@ -521,7 +668,9 @@ async function getWordsForToday(
         );
 
     const startIndex =
-        (dayNumber * count) %
+        (
+            dayNumber * count
+        ) %
         unseen.length;
 
     return Array.from(
