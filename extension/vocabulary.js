@@ -211,6 +211,77 @@ async function fetchWord(word) {
     }
 }
 
+async function buildDynamicVocabulary(progress) {
+    const cache =
+        await getVocabularyCache();
+
+    const discovered =
+        await discoverCandidateWords();
+
+    const combined = [];
+
+    Object.values(cache).forEach(
+        (word) => {
+            if (word) {
+                combined.push(word);
+            }
+        }
+    );
+
+    for (const candidate of discovered) {
+        const normalized =
+            candidate
+                .trim()
+                .toLowerCase();
+
+        if (!normalized) {
+            continue;
+        }
+
+        if (cache[normalized]) {
+            continue;
+        }
+
+        const word =
+            await fetchWord(candidate);
+
+        if (word) {
+            combined.push(word);
+        }
+
+        if (combined.length >= 80) {
+            break;
+        }
+    }
+
+    getFallbackWords().forEach(
+        (word) => {
+            combined.push(word);
+        }
+    );
+
+    const unique =
+        new Map();
+
+    combined.forEach(
+        (word) => {
+            if (
+                word &&
+                word.word
+            ) {
+                unique.set(
+                    word.word.toLowerCase(),
+                    word
+                );
+            }
+        }
+    );
+
+    return [
+        ...unique.values()
+    ];
+}
+
 function getFallbackWords() {
     return FALLBACK_WORDS
         .map((word) =>
