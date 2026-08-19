@@ -8,70 +8,43 @@ const REVISION_INTERVALS = [
 ];
 
 const STORAGE_KEYS = {
-    dailyData:
-        "dailyData",
-
-    wordProgress:
-        "wordProgress",
-
-    activityHistory:
-        "activityHistory"
+    dailyData: "dailyData",
+    wordProgress: "wordProgress",
+    activityHistory: "activityHistory"
 };
 
-function getDateKey(
-    date = new Date()
-) {
-    const year =
-        date.getFullYear();
+function getDateKey(date = new Date()) {
+    const year = date.getFullYear();
 
-    const month =
-        String(
-            date.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
+    const month = String(
+        date.getMonth() + 1
+    ).padStart(2, "0");
 
-    const day =
-        String(
-            date.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
+    const day = String(
+        date.getDate()
+    ).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
 }
 
 function getFormattedDate() {
-    return new Intl.DateTimeFormat(
-        "en-US",
-        {
-            weekday: "short",
-            month: "short",
-            day: "numeric"
-        }
-    ).format(
-        new Date()
-    );
+    return new Intl.DateTimeFormat("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric"
+    }).format(new Date());
 }
 
-function addDays(
-    dateKey,
-    days
-) {
-    const date =
-        new Date(
-            `${dateKey}T00:00:00`
-        );
+function addDays(dateKey, days) {
+    const date = new Date(
+        `${dateKey}T00:00:00`
+    );
 
     date.setDate(
         date.getDate() + days
     );
 
-    return getDateKey(
-        date
-    );
+    return getDateKey(date);
 }
 
 async function getWordProgress() {
@@ -81,14 +54,11 @@ async function getWordProgress() {
         ]);
 
     return (
-        result.wordProgress ||
-        {}
+        result.wordProgress || {}
     );
 }
 
-async function saveWordProgress(
-    progress
-) {
+async function saveWordProgress(progress) {
     await chrome.storage.local.set({
         [STORAGE_KEYS.wordProgress]:
             progress
@@ -102,8 +72,7 @@ async function getActivityHistory() {
         ]);
 
     return (
-        result.activityHistory ||
-        []
+        result.activityHistory || []
     );
 }
 
@@ -114,14 +83,8 @@ async function recordActivity() {
     const today =
         getDateKey();
 
-    if (
-        !history.includes(
-            today
-        )
-    ) {
-        history.push(
-            today
-        );
+    if (!history.includes(today)) {
+        history.push(today);
     }
 
     await chrome.storage.local.set({
@@ -130,24 +93,19 @@ async function recordActivity() {
     });
 }
 
-function calculateStreak(
-    history
-) {
-    const dates =
-        new Set(
-            history
-        );
+function calculateStreak(history) {
+    if (!history.length) {
+        return 0;
+    }
 
-    let cursor =
-        new Date();
+    const dates = new Set(history);
 
+    let cursor = new Date();
     let streak = 0;
 
     while (
         dates.has(
-            getDateKey(
-                cursor
-            )
+            getDateKey(cursor)
         )
     ) {
         streak += 1;
@@ -160,133 +118,90 @@ function calculateStreak(
     return streak;
 }
 
-function createDefaultProgress(
-    word
-) {
+function createDefaultProgress(word) {
     return {
-        word:
-            word.word,
+        word: word.word,
 
         pronunciation:
-            word.pronunciation ||
-            "",
+            word.pronunciation || "",
 
         partOfSpeech:
-            word.partOfSpeech ||
-            "",
+            word.partOfSpeech || "",
 
         meaning:
-            word.meaning ||
-            "",
+            word.meaning || "",
 
         synonym:
-            word.synonym ||
-            "—",
+            word.synonym || "—",
 
         antonym:
-            word.antonym ||
-            "—",
+            word.antonym || "—",
 
         examples:
-            word.examples ||
-            [],
+            word.examples || [],
 
-        masteryScore:
-            0,
+        masteryScore: 0,
 
-        intervalIndex:
-            0,
+        intervalIndex: 0,
 
-        dueDate:
-            null,
+        dueDate: null,
 
-        totalReviews:
-            0,
+        totalReviews: 0,
 
-        correctReviews:
-            0,
+        correctReviews: 0,
 
-        status:
-            "new",
+        status: "new",
 
-        lastReviewed:
-            null
+        lastReviewed: null
     };
 }
 
-function getMasteryLabel(
-    score
-) {
-    if (
-        score >= 85
-    ) {
+function getMasteryLabel(score) {
+    if (score >= 85) {
         return "Mastered";
     }
 
-    if (
-        score >= 60
-    ) {
+    if (score >= 60) {
         return "Familiar";
     }
 
     return "Learning";
 }
 
-function updateMastery(
-    item,
-    result
-) {
+function updateMasteryScore(item, result) {
     let score =
-        item.masteryScore ||
-        0;
+        item.masteryScore || 0;
 
-    if (
-        result === "hard"
-    ) {
+    if (result === "hard") {
         score -= 15;
     }
 
-    if (
-        result === "good"
-    ) {
+    if (result === "good") {
         score += 10;
     }
 
-    if (
-        result === "easy"
-    ) {
+    if (result === "easy") {
         score += 20;
     }
 
     return Math.max(
         0,
-        Math.min(
-            100,
-            score
-        )
+        Math.min(100, score)
     );
 }
 
-function getNextInterval(
-    item,
-    result
-) {
+function getNextIntervalIndex(item, result) {
     const current =
-        item.intervalIndex ||
-        0;
+        item.intervalIndex || 0;
 
-    if (
-        result === "hard"
-    ) {
+    if (result === "hard") {
         return Math.max(
             0,
             current - 1
         );
     }
 
-    if (
-        result === "good"
-    ) {
+    if (result === "good") {
         return Math.min(
             REVISION_INTERVALS.length - 1,
             current + 1
@@ -308,17 +223,17 @@ async function getDailyData() {
             STORAGE_KEYS.dailyData
         ]);
 
-    const stored =
+    const storedData =
         result.dailyData;
 
     const today =
         getDateKey();
 
     if (
-        stored &&
-        stored.date === today
+        storedData &&
+        storedData.date === today
     ) {
-        return stored;
+        return storedData;
     }
 
     const words =
@@ -328,16 +243,16 @@ async function getDailyData() {
         );
 
     const dailyData = {
-        date:
-            today,
+        date: today,
 
-        words:
-            words.map(
-                (word) => ({
-                    ...word,
-                    learned: false
-                })
-            )
+        words: words.map(
+            (word) => ({
+                ...word,
+                learned: Boolean(
+                    progress[word.word]
+                )
+            })
+        )
     };
 
     await chrome.storage.local.set({
@@ -382,8 +297,7 @@ function createWordCard(
         "pronunciation";
 
     pronunciation.textContent =
-        word.pronunciation ||
-        "";
+        word.pronunciation || "";
 
     const part =
         document.createElement(
@@ -421,7 +335,6 @@ function createWordCard(
       <span class="relation-label">
         Synonym
       </span>
-
       <span class="relation-value"></span>
     </div>
 
@@ -429,26 +342,20 @@ function createWordCard(
       <span class="relation-label">
         Antonym
       </span>
-
       <span class="relation-value"></span>
     </div>
   `;
 
-    relations
-        .querySelectorAll(
+    const relationValues =
+        relations.querySelectorAll(
             ".relation-value"
-        )[0]
-        .textContent =
-        word.synonym ||
-        "—";
+        );
 
-    relations
-        .querySelectorAll(
-            ".relation-value"
-        )[1]
-        .textContent =
-        word.antonym ||
-        "—";
+    relationValues[0].textContent =
+        word.synonym || "—";
+
+    relationValues[1].textContent =
+        word.antonym || "—";
 
     const examplesTitle =
         document.createElement(
@@ -472,10 +379,7 @@ function createWordCard(
     (
         word.examples || []
     )
-        .slice(
-            0,
-            4
-        )
+        .slice(0, 4)
         .forEach(
             (example) => {
                 const li =
@@ -505,15 +409,12 @@ function createWordCard(
             ? "Learned ✓"
             : "Mark as Learned";
 
-    if (
-        saved.learned
-    ) {
+    if (saved.learned) {
         button.classList.add(
             "learned"
         );
 
-        button.disabled =
-            true;
+        button.disabled = true;
     } else {
         button.addEventListener(
             "click",
@@ -521,23 +422,15 @@ function createWordCard(
                 const progress =
                     await getWordProgress();
 
-                if (
-                    !progress[
-                    word.word
-                    ]
-                ) {
-                    progress[
-                        word.word
-                    ] =
+                if (!progress[word.word]) {
+                    progress[word.word] =
                         createDefaultProgress(
                             word
                         );
                 }
 
                 const item =
-                    progress[
-                    word.word
-                    ];
+                    progress[word.word];
 
                 item.status =
                     "learning";
@@ -545,9 +438,10 @@ function createWordCard(
                 item.masteryScore =
                     Math.max(
                         10,
-                        item.masteryScore ||
-                        0
+                        item.masteryScore || 0
                     );
+
+                item.intervalIndex = 0;
 
                 item.dueDate =
                     addDays(
@@ -558,8 +452,8 @@ function createWordCard(
                 item.lastReviewed =
                     getDateKey();
 
-                saved.learned =
-                    true;
+                dailyData.words[index]
+                    .learned = true;
 
                 await saveWordProgress(
                     progress
@@ -577,37 +471,14 @@ function createWordCard(
         );
     }
 
-    card.appendChild(
-        title
-    );
-
-    card.appendChild(
-        pronunciation
-    );
-
-    card.appendChild(
-        part
-    );
-
-    card.appendChild(
-        meaning
-    );
-
-    card.appendChild(
-        relations
-    );
-
-    card.appendChild(
-        examplesTitle
-    );
-
-    card.appendChild(
-        examples
-    );
-
-    card.appendChild(
-        button
-    );
+    card.appendChild(title);
+    card.appendChild(pronunciation);
+    card.appendChild(part);
+    card.appendChild(meaning);
+    card.appendChild(relations);
+    card.appendChild(examplesTitle);
+    card.appendChild(examples);
+    card.appendChild(button);
 
     return card;
 }
@@ -650,8 +521,7 @@ function createRevisionCard(
         ".revision-status"
     ).textContent =
         getMasteryLabel(
-            item.masteryScore ||
-            0
+            item.masteryScore || 0
         );
 
     header.querySelector(
@@ -678,9 +548,7 @@ function createRevisionCard(
     fill.style.width =
         `${item.masteryScore || 0}%`;
 
-    track.appendChild(
-        fill
-    );
+    track.appendChild(fill);
 
     const prompt =
         document.createElement(
@@ -734,14 +602,12 @@ function createRevisionCard(
     answer.querySelectorAll(
         "strong"
     )[0].textContent =
-        word.synonym ||
-        "—";
+        word.synonym || "—";
 
     answer.querySelectorAll(
         "strong"
     )[1].textContent =
-        word.antonym ||
-        "—";
+        word.antonym || "—";
 
     const actions =
         document.createElement(
@@ -773,7 +639,6 @@ function createRevisionCard(
                 async () => {
                     await handleReview(
                         word,
-                        item,
                         type
                     );
 
@@ -803,90 +668,71 @@ function createRevisionCard(
         }
     );
 
-    card.appendChild(
-        header
-    );
-
-    card.appendChild(
-        track
-    );
-
-    card.appendChild(
-        prompt
-    );
-
-    card.appendChild(
-        show
-    );
-
-    card.appendChild(
-        answer
-    );
-
-    card.appendChild(
-        actions
-    );
+    card.appendChild(header);
+    card.appendChild(track);
+    card.appendChild(prompt);
+    card.appendChild(show);
+    card.appendChild(answer);
+    card.appendChild(actions);
 
     return card;
 }
 
 async function handleReview(
     word,
-    item,
     result
 ) {
     const progress =
         await getWordProgress();
 
-    const current =
-        progress[
-        word.word
-        ];
-
-    if (!current) {
-        return;
+    if (!progress[word.word]) {
+        progress[word.word] =
+            createDefaultProgress(
+                word
+            );
     }
 
-    current.totalReviews =
-        (current.totalReviews ||
-            0) + 1;
+    const item =
+        progress[word.word];
 
-    if (
-        result !== "hard"
-    ) {
-        current.correctReviews =
-            (current.correctReviews ||
-                0) + 1;
+    item.totalReviews =
+        (item.totalReviews || 0) + 1;
+
+    if (result !== "hard") {
+        item.correctReviews =
+            (item.correctReviews || 0) + 1;
     }
 
-    current.masteryScore =
-        updateMastery(
-            current,
+    item.masteryScore =
+        updateMasteryScore(
+            item,
             result
         );
 
-    current.intervalIndex =
-        getNextInterval(
-            current,
+    item.intervalIndex =
+        getNextIntervalIndex(
+            item,
             result
         );
 
-    current.dueDate =
+    item.dueDate =
         addDays(
             getDateKey(),
             result === "hard"
                 ? 1
                 : REVISION_INTERVALS[
-                current.intervalIndex
+                item.intervalIndex
                 ]
         );
 
-    current.status =
-        getMasteryLabel(
-            current.masteryScore
-        ).toLowerCase();
+    item.status =
+        result === "hard"
+            ? "learning"
+            : getMasteryLabel(
+                item.masteryScore
+            ).toLowerCase();
 
-    current.lastReviewed =
+    item.lastReviewed =
         getDateKey();
 
     await saveWordProgress(
@@ -896,35 +742,88 @@ async function handleReview(
     await recordActivity();
 }
 
+async function getDueWords(progress) {
+    const today =
+        getDateKey();
+
+    return Object.values(progress)
+        .filter(
+            (item) =>
+                item.dueDate &&
+                item.dueDate <= today
+        )
+        .sort(
+            (a, b) =>
+                (a.masteryScore || 0) -
+                (b.masteryScore || 0)
+        );
+}
+
+function getWordData(item) {
+    const localWord =
+        WORDS.find(
+            (word) =>
+                word.word === item.word
+        );
+
+    if (localWord) {
+        return localWord;
+    }
+
+    return item;
+}
+
+function calculateAverageMastery(
+    progress
+) {
+    const values =
+        Object.values(progress).map(
+            (item) =>
+                item.masteryScore || 0
+        );
+
+    if (!values.length) {
+        return null;
+    }
+
+    return Math.round(
+        values.reduce(
+            (sum, value) =>
+                sum + value,
+            0
+        ) / values.length
+    );
+}
+
 async function render() {
     const progress =
         await getWordProgress();
 
-    const daily =
+    const dailyData =
         await getDailyData();
 
-    const container =
+    const wordsContainer =
         document.getElementById(
             "words-container"
         );
 
-    container.innerHTML =
+    wordsContainer.innerHTML =
         "";
 
-    daily.words.forEach(
+    dailyData.words.forEach(
         (word, index) => {
-            container.appendChild(
+            wordsContainer.appendChild(
                 createWordCard(
                     word,
                     word,
                     index,
-                    daily
+                    dailyData
                 )
             );
         }
     );
 
-    const due =
+    const dueWords =
         await getDueWords(
             progress
         );
@@ -945,9 +844,9 @@ async function render() {
     document.getElementById(
         "revision-count"
     ).textContent =
-        due.length;
+        dueWords.length;
 
-    if (!due.length) {
+    if (!dueWords.length) {
         revisionSection.classList.add(
             "hidden"
         );
@@ -956,20 +855,13 @@ async function render() {
             "hidden"
         );
 
-        due.slice(
-            0,
-            3
-        ).forEach(
-            (item) => {
-                const word =
-                    getWordDataByProgress(
-                        item,
-                        progress
-                    );
+        dueWords
+            .slice(0, 3)
+            .forEach(
+                (item) => {
+                    const word =
+                        getWordData(item);
 
-                if (
-                    word
-                ) {
                     revisionContainer.appendChild(
                         createRevisionCard(
                             word,
@@ -977,12 +869,11 @@ async function render() {
                         )
                     );
                 }
-            }
-        );
+            );
     }
 
     const learned =
-        daily.words.filter(
+        dailyData.words.filter(
             (item) =>
                 item.learned
         ).length;
@@ -995,7 +886,7 @@ async function render() {
     document.getElementById(
         "due-count"
     ).textContent =
-        due.length;
+        dueWords.length;
 
     document.getElementById(
         "progress-text"
@@ -1032,76 +923,6 @@ async function render() {
         );
 }
 
-async function getDueWords(
-    progress
-) {
-    const today =
-        getDateKey();
-
-    return Object.values(
-        progress
-    )
-        .filter(
-            (item) =>
-                item.dueDate &&
-                item.dueDate <= today
-        )
-        .sort(
-            (a, b) =>
-                (a.masteryScore || 0) -
-                (b.masteryScore || 0)
-        );
-}
-
-function getWordDataByProgress(
-    item,
-    progress
-) {
-    return (
-        WORDS.find(
-            (word) =>
-                word.word === item.word
-        ) ||
-        progress[item.word] ||
-        item
-    );
-}
-
-function calculateAverageMastery(
-    progress
-) {
-    const values =
-        Object.values(
-            progress
-        )
-            .map(
-                (item) =>
-                    item.masteryScore ||
-                    0
-            );
-
-    if (!values.length) {
-        return null;
-    }
-
-    return Math.round(
-        values.reduce(
-            (sum, value) =>
-                sum + value,
-            0
-        ) / values.length
-    );
-}
-
-function openDashboard() {
-    chrome.tabs.create({
-        url:
-            chrome.runtime.getURL(
-                "dashboard.html"
-            )
-    });
-}
-
 function initialize() {
     document.getElementById(
         "date"
@@ -1112,7 +933,14 @@ function initialize() {
         "open-dashboard"
     ).addEventListener(
         "click",
-        openDashboard
+        () => {
+            chrome.tabs.create({
+                url:
+                    chrome.runtime.getURL(
+                        "dashboard.html"
+                    )
+            });
+        }
     );
 }
 
@@ -1120,6 +948,25 @@ document.addEventListener(
     "DOMContentLoaded",
     async () => {
         initialize();
-        await render();
+
+        try {
+            await render();
+        } catch (error) {
+            console.error(
+                "LexiLoop failed to load:",
+                error
+            );
+
+            document.getElementById(
+                "words-container"
+            ).innerHTML = `
+        <div class="word-card">
+          <p class="meaning">
+            Something went wrong while
+            loading today's vocabulary.
+          </p>
+        </div>
+      `;
+        }
     }
 );
