@@ -260,7 +260,9 @@ async function getWordsForToday(
     count = 3
 ) {
     const vocabulary =
-        await getAvailableVocabulary();
+        await buildDynamicVocabulary(
+            progress
+        );
 
     const unseen =
         vocabulary.filter(
@@ -290,16 +292,7 @@ async function getWordsForToday(
         );
     }
 
-    const fallback =
-        getFallbackWords().filter(
-            (word) =>
-                !progress[word.word]
-        );
-
-    return fallback.slice(
-        0,
-        count
-    );
+    return unseen;
 }
 
 async function discoverWord(word) {
