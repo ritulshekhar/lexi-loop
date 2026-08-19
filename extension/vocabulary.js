@@ -67,7 +67,6 @@ const BLOCKED_CANDIDATES = new Set([
     "tech",
     "info",
     "etc",
-    "ok",
     "okay",
     "yeah",
     "yep",
@@ -213,7 +212,7 @@ function scoreCandidate(word) {
     return score;
 }
 
-function normalizeWordData(data) {
+function normalizeDictionaryData(data) {
     if (
         !Array.isArray(data) ||
         data.length === 0
@@ -223,7 +222,9 @@ function normalizeWordData(data) {
 
     const entry = data[0];
 
-    const meanings = Array.isArray(entry.meanings)
+    const meanings = Array.isArray(
+        entry.meanings
+    )
         ? entry.meanings
         : [];
 
@@ -246,13 +247,13 @@ function normalizeWordData(data) {
     const firstDefinition =
         definitions[0];
 
-    if (
-        !firstDefinition.definition
-    ) {
+    if (!firstDefinition.definition) {
         return null;
     }
 
-    const phonetics = Array.isArray(entry.phonetics)
+    const phonetics = Array.isArray(
+        entry.phonetics
+    )
         ? entry.phonetics
         : [];
 
@@ -263,30 +264,33 @@ function normalizeWordData(data) {
                 item.text
         )?.text || "";
 
-    const synonyms = definitions
-        .flatMap(
-            (item) =>
-                Array.isArray(item.synonyms)
-                    ? item.synonyms
-                    : []
-        )
-        .filter(Boolean);
+    const synonyms =
+        definitions
+            .flatMap(
+                (item) =>
+                    Array.isArray(item.synonyms)
+                        ? item.synonyms
+                        : []
+            )
+            .filter(Boolean);
 
-    const antonyms = definitions
-        .flatMap(
-            (item) =>
-                Array.isArray(item.antonyms)
-                    ? item.antonyms
-                    : []
-        )
-        .filter(Boolean);
+    const antonyms =
+        definitions
+            .flatMap(
+                (item) =>
+                    Array.isArray(item.antonyms)
+                        ? item.antonyms
+                        : []
+            )
+            .filter(Boolean);
 
-    const examples = definitions
-        .map(
-            (item) =>
-                item.example
-        )
-        .filter(Boolean);
+    const examples =
+        definitions
+            .map(
+                (item) =>
+                    item.example
+            )
+            .filter(Boolean);
 
     return {
         word: entry.word,
@@ -320,6 +324,140 @@ function normalizeWordData(data) {
     };
 }
 
+function normalizeWiktionaryData(
+    data,
+    requestedWord
+) {
+    if (
+        !data ||
+        typeof data !== "object"
+    ) {
+        return null;
+    }
+
+    const entries = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.data)
+            ? data.data
+            : [];
+
+    if (!entries.length) {
+        return null;
+    }
+
+    const entry =
+        entries[0];
+
+    const requested =
+        normalizeCandidate(
+            requestedWord
+        );
+
+    let partOfSpeech = "word";
+    let meaning = "";
+    let pronunciation = "";
+    let example = "";
+
+    if (
+        entry &&
+        typeof entry === "object"
+    ) {
+        partOfSpeech =
+            entry.partOfSpeech ||
+            entry.pos ||
+            entry.part_of_speech ||
+            "word";
+
+        pronunciation =
+            entry.pronunciation ||
+            entry.ipa ||
+            entry.pron ||
+            "";
+
+        if (
+            Array.isArray(
+                entry.definitions
+            )
+        ) {
+            const definition =
+                entry.definitions.find(
+                    (item) =>
+                        item &&
+                        (
+                            item.definition ||
+                            item.text
+                        )
+                );
+
+            if (definition) {
+                meaning =
+                    definition.definition ||
+                    definition.text ||
+                    "";
+
+                example =
+                    definition.example ||
+                    "";
+            }
+        }
+
+        if (
+            !meaning &&
+            typeof entry.definition ===
+            "string"
+        ) {
+            meaning =
+                entry.definition;
+        }
+
+        if (
+            !meaning &&
+            typeof entry.text ===
+            "string"
+        ) {
+            meaning =
+                entry.text;
+        }
+    }
+
+    if (!meaning) {
+        return null;
+    }
+
+    return {
+        word:
+            entry.word ||
+            requested,
+
+        pronunciation,
+
+        partOfSpeech,
+
+        meaning,
+
+        synonym: "—",
+
+        antonym: "—",
+
+        examples:
+            example
+                ? [
+                    example,
+                    `The word "${requested}" can be useful in professional communication.`,
+                    `Try using "${requested}" in a sentence of your own.`,
+                    `You may encounter "${requested}" in meetings or written communication.`
+                ]
+                : [
+                    `The word "${requested}" can be useful in professional communication.`,
+                    `You may encounter "${requested}" in meetings or written communication.`,
+                    `Try using "${requested}" in a sentence of your own.`,
+                    `Review "${requested}" again during your next revision.`
+                ],
+
+        source: "wiktionary"
+    };
+}
+
 async function getVocabularyCache() {
     const result =
         await chrome.storage.local.get([
@@ -332,12 +470,13 @@ async function getVocabularyCache() {
     );
 }
 
-async function saveVocabularyCache(cache) {
+async function saveVocabularyCache(
+    cache
+) {
     const entries =
-        Object.entries(cache)
-            .slice(
-                -VOCABULARY_CACHE_LIMIT
-            );
+        Object.entries(cache).slice(
+            -VOCABULARY_CACHE_LIMIT
+        );
 
     await chrome.storage.local.set({
         [VOCABULARY_CACHE_KEY]:
@@ -345,13 +484,15 @@ async function saveVocabularyCache(cache) {
     });
 }
 
-async function fetchWord(word) {
-    const normalizedWord =
+async function fetchDictionaryWord(
+    word
+) {
+    const normalized =
         normalizeCandidate(word);
 
     if (
         !isValidWordCandidate(
-            normalizedWord
+            normalized
         )
     ) {
         return null;
@@ -361,16 +502,18 @@ async function fetchWord(word) {
         await getVocabularyCache();
 
     if (
-        cache[normalizedWord]
+        cache[normalized] &&
+        cache[normalized].source ===
+        "dictionary"
     ) {
-        return cache[normalizedWord];
+        return cache[normalized];
     }
 
     try {
         const response =
             await fetch(
                 `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(
-                    normalizedWord
+                    normalized
                 )}`
             );
 
@@ -381,26 +524,97 @@ async function fetchWord(word) {
         const data =
             await response.json();
 
-        const normalized =
-            normalizeWordData(
-                data
+        return normalizeDictionaryData(
+            data
+        );
+    } catch {
+        return null;
+    }
+}
+
+async function fetchWiktionaryWord(
+    word
+) {
+    const normalized =
+        normalizeCandidate(word);
+
+    if (
+        !isValidWordCandidate(
+            normalized
+        )
+    ) {
+        return null;
+    }
+
+    try {
+        const response =
+            await fetch(
+                `https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(
+                    normalized
+                )}`
             );
 
-        if (!normalized) {
+        if (!response.ok) {
             return null;
         }
 
-        cache[normalizedWord] =
-            normalized;
+        const data =
+            await response.json();
 
-        await saveVocabularyCache(
-            cache
+        return normalizeWiktionaryData(
+            data,
+            normalized
         );
-
-        return normalized;
-    } catch (error) {
+    } catch {
         return null;
     }
+}
+
+async function fetchWord(word) {
+    const normalized =
+        normalizeCandidate(word);
+
+    if (
+        !isValidWordCandidate(
+            normalized
+        )
+    ) {
+        return null;
+    }
+
+    const cache =
+        await getVocabularyCache();
+
+    if (
+        cache[normalized]
+    ) {
+        return cache[normalized];
+    }
+
+    let result =
+        await fetchDictionaryWord(
+            normalized
+        );
+
+    if (!result) {
+        result =
+            await fetchWiktionaryWord(
+                normalized
+            );
+    }
+
+    if (!result) {
+        return null;
+    }
+
+    cache[normalized] =
+        result;
+
+    await saveVocabularyCache(
+        cache
+    );
+
+    return result;
 }
 
 async function getDiscoveryCache() {
@@ -415,7 +629,9 @@ async function getDiscoveryCache() {
     );
 }
 
-async function saveDiscoveryCache(words) {
+async function saveDiscoveryCache(
+    words
+) {
     const uniqueWords = [
         ...new Set(
             words
@@ -495,42 +711,38 @@ async function discoverCandidateWords() {
             ) {
                 break;
             }
-        } catch (error) {
-            console.warn(
-                "Candidate discovery failed:",
-                seed
-            );
+        } catch {
+            continue;
         }
     }
 
-    const ranked =
-        [
-            ...new Set(
-                discovered
-                    .map(
-                        normalizeCandidate
-                    )
-                    .filter(
-                        isValidWordCandidate
-                    )
-            )
-        ]
-            .map(
-                (word) => ({
-                    word,
-                    score:
-                        scoreCandidate(word)
-                })
-            )
-            .sort(
-                (a, b) =>
-                    b.score -
-                    a.score
-            )
-            .map(
-                (item) =>
-                    item.word
-            );
+    const ranked = [
+        ...new Set(
+            discovered
+                .map(
+                    normalizeCandidate
+                )
+                .filter(
+                    isValidWordCandidate
+                )
+        )
+    ]
+        .map(
+            (word) => ({
+                word,
+                score:
+                    scoreCandidate(word)
+            })
+        )
+        .sort(
+            (a, b) =>
+                b.score -
+                a.score
+        )
+        .map(
+            (item) =>
+                item.word
+        );
 
     await saveDiscoveryCache(
         ranked
@@ -589,7 +801,7 @@ async function buildDynamicVocabulary(
                 20
             );
 
-    const fetched =
+    const results =
         await Promise.all(
             candidatesToFetch.map(
                 (candidate) =>
@@ -597,7 +809,7 @@ async function buildDynamicVocabulary(
             )
         );
 
-    fetched.forEach(
+    results.forEach(
         (word) => {
             if (word) {
                 combined.push(word);
@@ -650,9 +862,7 @@ async function getWordsForToday(
                 !progress[word.word]
         );
 
-    if (
-        unseen.length === 0
-    ) {
+    if (!unseen.length) {
         return [];
     }
 
@@ -664,7 +874,8 @@ async function getWordsForToday(
 
     const dayNumber =
         Math.floor(
-            Date.now() / 86400000
+            Date.now() /
+            86400000
         );
 
     const startIndex =
