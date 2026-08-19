@@ -4,16 +4,13 @@
 
 body {
     margin: 0;
-
     width: 390px;
-
     font-family:
         Inter,
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
         sans-serif;
-
     background: #f7f7f4;
     color: #242424;
 }
@@ -24,64 +21,43 @@ body {
 
 .header {
     display: flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        flex-start;
-
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 17px;
 }
 
 .brand {
     font-size: 24px;
     font-weight: 700;
-
     letter-spacing: -0.6px;
 }
 
 .subtitle {
     margin-top: 3px;
-
     font-size: 11px;
-
     color: #7c7c76;
 }
 
 .date {
     font-size: 10px;
-
     color: #7c7c76;
-
     text-align: right;
 }
 
 .quick-stats {
     display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
+    grid-template-columns: repeat(4, 1fr);
     margin-bottom: 19px;
-
     padding: 12px 7px;
-
-    border:
-        1px solid #deded8;
-
+    border: 1px solid #deded8;
     border-radius: 14px;
-
     background: #ffffff;
 }
 
 .quick-stat {
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     gap: 3px;
 }
 
@@ -92,12 +68,8 @@ body {
 
 .quick-stat span {
     font-size: 8px;
-
     color: #888;
-
-    text-transform:
-        uppercase;
-
+    text-transform: uppercase;
     letter-spacing: 0.4px;
 }
 
@@ -107,307 +79,203 @@ body {
 
 .section-heading {
     display: flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        flex-end;
-
+    justify-content: space-between;
+    align-items: flex-end;
     margin-bottom: 9px;
 }
 
 .section-label {
     font-size: 8px;
-
     font-weight: 700;
-
     letter-spacing: 1px;
-
     color: #999991;
 }
 
 .section-heading h2 {
     margin: 3px 0 0;
-
     font-size: 16px;
-
     letter-spacing: -0.2px;
 }
 
 .progress-text,
 .count-badge {
     padding: 5px 8px;
-
     border-radius: 999px;
-
     background: #ecece7;
-
     font-size: 9px;
-
     font-weight: 700;
-
     color: #666;
 }
 
 .words-container,
 .revision-container {
     display: flex;
-
-    flex-direction:
-        column;
-
+    flex-direction: column;
     gap: 9px;
 }
 
 .word-card,
 .revision-card {
     padding: 13px;
-
-    border:
-        1px solid #deded8;
-
+    border: 1px solid #deded8;
     border-radius: 14px;
-
     background: #ffffff;
 }
 
 .word-title {
     margin: 0;
-
     font-size: 21px;
-
     font-weight: 700;
 }
 
 .pronunciation {
     margin-top: 3px;
-
     font-size: 10px;
-
     color: #888;
 }
 
 .part-of-speech {
     display: inline-block;
-
     margin-top: 6px;
-
     padding: 3px 7px;
-
     border-radius: 999px;
-
     background: #f0f0eb;
-
     font-size: 8px;
-
     font-weight: 600;
-
     color: #6a6a64;
-
-    text-transform:
-        uppercase;
-
+    text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .meaning {
     margin: 10px 0;
-
     font-size: 11px;
-
     line-height: 1.5;
-
     color: #4b4b47;
 }
 
 .word-relations {
     display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
+    grid-template-columns: 1fr 1fr;
     gap: 6px;
-
     margin-bottom: 10px;
 }
 
 .relation {
     padding: 7px 8px;
-
     border-radius: 9px;
-
     background: #f6f6f2;
 }
 
 .relation-label {
     display: block;
-
     margin-bottom: 2px;
-
     font-size: 7px;
-
     color: #92928a;
-
-    text-transform:
-        uppercase;
-
+    text-transform: uppercase;
     letter-spacing: 0.6px;
 }
 
 .relation-value {
     font-size: 10px;
-
     font-weight: 600;
 }
 
 .examples-title {
     margin-bottom: 5px;
-
     font-size: 8px;
-
     font-weight: 700;
-
     color: #888;
-
-    text-transform:
-        uppercase;
-
+    text-transform: uppercase;
     letter-spacing: 0.6px;
 }
 
 .examples {
     margin: 0;
-
     padding-left: 15px;
 }
 
 .examples li {
     margin-bottom: 4px;
-
     font-size: 9.5px;
-
     line-height: 1.45;
-
     color: #5a5a55;
 }
 
 .learn-button,
 .show-answer-button {
     width: 100%;
-
     margin-top: 9px;
-
     padding: 8px 10px;
-
-    border:
-        1px solid #303030;
-
+    border: 1px solid #303030;
     border-radius: 9px;
-
     background: #303030;
-
     color: #ffffff;
-
     font-size: 9px;
-
     font-weight: 600;
-
     cursor: pointer;
 }
 
 .learn-button.learned {
-    border-color:
-        #d1d1ca;
-
-    background:
-        #ecece6;
-
-    color:
-        #555;
-
+    border-color: #d1d1ca;
+    background: #ecece6;
+    color: #555;
     cursor: default;
 }
 
 .revision-header {
     display: flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        center;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .revision-word {
     margin: 0;
-
     font-size: 17px;
-
     font-weight: 700;
 }
 
 .revision-meta {
     display: flex;
-
     gap: 5px;
 }
 
 .revision-status,
 .mastery-score {
     padding: 4px 6px;
-
     border-radius: 999px;
-
     background: #eeeeea;
-
     font-size: 7px;
-
     font-weight: 700;
-
     color: #777;
-
-    text-transform:
-        uppercase;
+    text-transform: uppercase;
 }
 
 .mastery-track {
     width: 100%;
-
     height: 4px;
-
     margin-top: 8px;
-
     overflow: hidden;
-
     border-radius: 999px;
-
     background: #e4e4de;
 }
 
 .mastery-fill {
     height: 100%;
-
     background: #5b5b57;
-
     border-radius: 999px;
 }
 
 .revision-prompt {
     margin: 9px 0;
-
     font-size: 10px;
-
     color: #555;
 }
 
 .answer-box {
     display: none;
-
     padding: 9px;
-
     border-radius: 9px;
-
     background: #f1f1ec;
 }
 
@@ -417,28 +285,20 @@ body {
 
 .answer-meaning {
     margin: 0;
-
     font-size: 10px;
-
     line-height: 1.5;
 }
 
 .answer-detail {
     margin-top: 5px;
-
     font-size: 9px;
-
     color: #666;
 }
 
 .revision-actions {
     display: none;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
+    grid-template-columns: repeat(3, 1fr);
     gap: 5px;
-
     margin-top: 8px;
 }
 
@@ -448,54 +308,32 @@ body {
 
 .revision-button {
     padding: 7px 4px;
-
-    border:
-        1px solid #d7d7d0;
-
+    border: 1px solid #d7d7d0;
     border-radius: 8px;
-
-    background: #fff;
-
+    background: #ffffff;
     font-size: 8px;
-
     cursor: pointer;
 }
 
 .completion-message {
     margin-bottom: 12px;
-
     padding: 9px;
-
-    border:
-        1px solid #d9d9d2;
-
+    border: 1px solid #d9d9d2;
     border-radius: 10px;
-
     background: #efefe9;
-
     font-size: 10px;
-
     color: #555;
 }
 
 .dashboard-button {
     width: 100%;
-
     padding: 9px;
-
-    border:
-        1px solid #d5d5ce;
-
+    border: 1px solid #d5d5ce;
     border-radius: 9px;
-
     background: #ffffff;
-
     color: #555;
-
     font-size: 9px;
-
     font-weight: 600;
-
     cursor: pointer;
 }
 
@@ -505,16 +343,10 @@ body {
 
 .footer {
     margin-top: 14px;
-
     padding-top: 11px;
-
-    border-top:
-        1px solid #e3e3de;
-
+    border-top: 1px solid #e3e3de;
     font-size: 8px;
-
     color: #92928a;
-
     text-align: center;
 }
 
