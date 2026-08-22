@@ -353,3 +353,43 @@ body {
 .hidden {
     display: none !important;
 }
+
+.variant-section {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+}
+
+.variant-label {
+    font-size: 9px;
+
+    font-weight: 700;
+
+    color: #92928a;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.7px;
+}
+
+.variant-select {
+    padding: 7px 9px;
+
+    border:
+        1px solid #d8d8d1;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #555;
+
+    font-size: 9px;
+
+    outline: none;
+}

@@ -923,7 +923,7 @@ async function render() {
         );
 }
 
-function initialize() {
+async function initialize() {
     document.getElementById(
         "date"
     ).textContent =
@@ -942,31 +942,46 @@ function initialize() {
             });
         }
     );
+
+    const variantSelect =
+        document.getElementById(
+            "variant-select"
+        );
+
+    const currentSettings =
+        await getVocabularySettings();
+
+    variantSelect.value =
+        currentSettings.variant;
+
+    variantSelect.addEventListener(
+        "change",
+        async () => {
+            await saveVocabularySettings({
+                variant:
+                    variantSelect.value
+            });
+
+            await chrome.storage.local.remove(
+                "dailyData"
+            );
+
+            await render();
+        }
+    );
 }
 
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
-        initialize();
-
         try {
+            await initialize();
             await render();
         } catch (error) {
             console.error(
                 "LexiLoop failed to load:",
                 error
             );
-
-            document.getElementById(
-                "words-container"
-            ).innerHTML = `
-        <div class="word-card">
-          <p class="meaning">
-            Something went wrong while
-            loading today's vocabulary.
-          </p>
-        </div>
-      `;
         }
     }
 );

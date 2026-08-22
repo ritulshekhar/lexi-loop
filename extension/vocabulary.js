@@ -1,5 +1,6 @@
 const VOCABULARY_CACHE_KEY = "vocabularyCache";
 const DISCOVERY_CACHE_KEY = "discoveryCache";
+const VOCABULARY_SETTINGS_KEY = "vocabularySettings";
 
 const VOCABULARY_CACHE_LIMIT = 500;
 const DISCOVERY_CACHE_LIMIT = 150;
@@ -127,22 +128,83 @@ const PROFESSIONAL_WORDS = new Set([
     "stakeholder"
 ]);
 
-const PROFESSIONAL_PATTERNS = [
-    "able",
-    "ance",
-    "ence",
-    "ment",
-    "tion",
-    "sion",
-    "tive",
-    "ive",
-    "ity",
-    "ical",
-    "ary",
-    "ory",
-    "ous",
-    "ful"
-];
+const US_TERMS = new Set([
+    "prioritize",
+    "organization",
+    "organize",
+    "optimize",
+    "analyze",
+    "behavior",
+    "center",
+    "color",
+    "customize",
+    "emphasize",
+    "favor",
+    "fulfill",
+    "license",
+    "localize",
+    "maximize",
+    "minimize",
+    "modeling",
+    "program",
+    "realize",
+    "specialize",
+    "standardize",
+    "strategize",
+    "utilize"
+]);
+
+const UK_TERMS = new Set([
+    "prioritise",
+    "organisation",
+    "organise",
+    "optimise",
+    "analyse",
+    "behaviour",
+    "centre",
+    "colour",
+    "customise",
+    "emphasise",
+    "favour",
+    "fulfil",
+    "licence",
+    "localise",
+    "maximise",
+    "minimise",
+    "modelling",
+    "programme",
+    "realise",
+    "specialise",
+    "standardise",
+    "strategise",
+    "utilise"
+]);
+
+const UK_US_EQUIVALENTS = {
+    prioritise: "prioritize",
+    organisation: "organization",
+    organise: "organize",
+    optimise: "optimize",
+    analyse: "analyze",
+    behaviour: "behavior",
+    centre: "center",
+    colour: "color",
+    customise: "customize",
+    emphasise: "emphasize",
+    favour: "favor",
+    fulfil: "fulfill",
+    licence: "license",
+    localise: "localize",
+    maximise: "maximize",
+    minimise: "minimize",
+    modelling: "modeling",
+    programme: "program",
+    realise: "realize",
+    specialise: "specialize",
+    standardise: "standardize",
+    strategise: "strategize",
+    utilise: "utilize"
+};
 
 const BLOCKED_CANDIDATES = new Set([
     "biz",
@@ -239,6 +301,71 @@ function normalizeCandidate(word) {
         .toLowerCase();
 }
 
+function getDefaultSettings() {
+    return {
+        variant: "global"
+    };
+}
+
+async function getVocabularySettings() {
+    const result =
+        await chrome.storage.local.get([
+            VOCABULARY_SETTINGS_KEY
+        ]);
+
+    return {
+        ...getDefaultSettings(),
+        ...(result[VOCABULARY_SETTINGS_KEY] || {})
+    };
+}
+
+async function saveVocabularySettings(
+    settings
+) {
+    await chrome.storage.local.set({
+        [VOCABULARY_SETTINGS_KEY]: {
+            ...getDefaultSettings(),
+            ...settings
+        }
+    });
+}
+
+function getVariantForWord(word) {
+    const normalized =
+        normalizeCandidate(word);
+
+    if (US_TERMS.has(normalized)) {
+        return "us";
+    }
+
+    if (UK_TERMS.has(normalized)) {
+        return "uk";
+    }
+
+    return "global";
+}
+
+function isVariantCompatible(
+    word,
+    variant
+) {
+    const normalized =
+        normalizeCandidate(word);
+
+    if (variant === "global") {
+        return true;
+    }
+
+    const detected =
+        getVariantForWord(normalized);
+
+    if (detected === "global") {
+        return true;
+    }
+
+    return detected === variant;
+}
+
 function isValidWordCandidate(word) {
     const normalized =
         normalizeCandidate(word);
@@ -264,17 +391,13 @@ function isValidWordCandidate(word) {
     }
 
     if (
-        BLOCKED_CANDIDATES.has(
-            normalized
-        )
+        BLOCKED_CANDIDATES.has(normalized)
     ) {
         return false;
     }
 
     if (
-        COMMON_FUNCTION_WORDS.has(
-            normalized
-        )
+        COMMON_FUNCTION_WORDS.has(normalized)
     ) {
         return false;
     }
@@ -282,16 +405,17 @@ function isValidWordCandidate(word) {
     return true;
 }
 
-function scoreCandidate(word) {
+function scoreCandidate(
+    word,
+    variant = "global"
+) {
     const normalized =
         normalizeCandidate(word);
 
     let score = 0;
 
     if (
-        PROFESSIONAL_WORDS.has(
-            normalized
-        )
+        PROFESSIONAL_WORDS.has(normalized)
     ) {
         score += 12;
     }
@@ -308,15 +432,33 @@ function scoreCandidate(word) {
         score += 1;
     }
 
-    PROFESSIONAL_PATTERNS.forEach(
-        (pattern) => {
-            if (
-                normalized.endsWith(pattern)
-            ) {
-                score += 1;
-            }
-        }
-    );
+    if (
+        variant === "us" &&
+        US_TERMS.has(normalized)
+    ) {
+        score += 10;
+    }
+
+    if (
+        variant === "uk" &&
+        UK_TERMS.has(normalized)
+    ) {
+        score += 10;
+    }
+
+    if (
+        variant === "us" &&
+        UK_TERMS.has(normalized)
+    ) {
+        score -= 8;
+    }
+
+    if (
+        variant === "uk" &&
+        US_TERMS.has(normalized)
+    ) {
+        score -= 8;
+    }
 
     if (
         normalized.includes("work") ||
@@ -343,9 +485,7 @@ function normalizeDictionaryData(data) {
 
     const entry = data[0];
 
-    const meanings = Array.isArray(
-        entry.meanings
-    )
+    const meanings = Array.isArray(entry.meanings)
         ? entry.meanings
         : [];
 
@@ -373,9 +513,7 @@ function normalizeDictionaryData(data) {
         return null;
     }
 
-    const phonetics = Array.isArray(
-        entry.phonetics
-    )
+    const phonetics = Array.isArray(entry.phonetics)
         ? entry.phonetics
         : [];
 
@@ -468,9 +606,13 @@ function normalizeWiktionaryData(
             requestedWord
         );
 
-    let partOfSpeech = "word";
+    let partOfSpeech =
+        "word";
+
     let meaning = "";
+
     let pronunciation = "";
+
     let example = "";
 
     if (
@@ -582,10 +724,9 @@ async function saveVocabularyCache(
     cache
 ) {
     const entries =
-        Object.entries(cache)
-            .slice(
-                -VOCABULARY_CACHE_LIMIT
-            );
+        Object.entries(cache).slice(
+            -VOCABULARY_CACHE_LIMIT
+        );
 
     await chrome.storage.local.set({
         [VOCABULARY_CACHE_KEY]:
@@ -839,26 +980,21 @@ async function discoverCandidateWords() {
         ]
             .map(
                 (word) => ({
-                    word,
-                    score:
-                        scoreCandidate(word)
+                    word
                 })
-            )
-            .sort(
-                (a, b) =>
-                    b.score -
-                    a.score
-            )
-            .map(
-                (item) =>
-                    item.word
             );
 
     await saveDiscoveryCache(
-        ranked
+        ranked.map(
+            (item) =>
+                item.word
+        )
     );
 
-    return ranked;
+    return ranked.map(
+        (item) =>
+            item.word
+    );
 }
 
 function getFallbackWords() {
@@ -867,8 +1003,7 @@ function getFallbackWords() {
             (word) =>
                 WORDS.find(
                     (item) =>
-                        item.word ===
-                        word
+                        item.word === word
                 )
         )
         .filter(Boolean);
@@ -882,6 +1017,9 @@ async function buildDynamicVocabulary(
 
     const candidates =
         await discoverCandidateWords();
+
+    const settings =
+        await getVocabularySettings();
 
     const combined = [];
 
@@ -907,6 +1045,17 @@ async function buildDynamicVocabulary(
                         candidate
                     )
                     ]
+            )
+            .sort(
+                (a, b) =>
+                    scoreCandidate(
+                        b,
+                        settings.variant
+                    ) -
+                    scoreCandidate(
+                        a,
+                        settings.variant
+                    )
             )
             .slice(
                 0,
@@ -969,6 +1118,9 @@ async function getWordsForToday(
     progress,
     count = 3
 ) {
+    const settings =
+        await getVocabularySettings();
+
     const vocabulary =
         await buildDynamicVocabulary(
             progress
@@ -992,13 +1144,28 @@ async function getWordsForToday(
                         return false;
                     }
 
+                    if (
+                        !isVariantCompatible(
+                            word.word,
+                            settings.variant
+                        )
+                    ) {
+                        return false;
+                    }
+
                     return true;
                 }
             )
             .sort(
                 (a, b) =>
-                    scoreCandidate(b.word) -
-                    scoreCandidate(a.word)
+                    scoreCandidate(
+                        b.word,
+                        settings.variant
+                    ) -
+                    scoreCandidate(
+                        a.word,
+                        settings.variant
+                    )
             );
 
     if (!candidates.length) {
@@ -1013,8 +1180,7 @@ async function getWordsForToday(
 
     const dayNumber =
         Math.floor(
-            Date.now() /
-            86400000
+            Date.now() / 86400000
         );
 
     const poolSize =
@@ -1062,6 +1228,10 @@ async function getWordsForToday(
     return selected;
 }
 
-async function discoverWord(word) {
-    return fetchWord(word);
+async function discoverWord(
+    word
+) {
+    return fetchWord(
+        word
+    );
 }
