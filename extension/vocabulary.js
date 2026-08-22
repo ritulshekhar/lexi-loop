@@ -1130,10 +1130,7 @@ async function getWordsForToday(
         vocabulary
             .filter(
                 (word) => {
-                    const saved =
-                        progress[word.word];
-
-                    if (saved) {
+                    if (progress[word.word]) {
                         return false;
                     }
 
@@ -1172,10 +1169,17 @@ async function getWordsForToday(
         return [];
     }
 
-    if (
-        candidates.length <= count
-    ) {
-        return candidates;
+    const pool =
+        candidates.slice(
+            0,
+            Math.min(
+                18,
+                candidates.length
+            )
+        );
+
+    if (pool.length <= count) {
+        return pool;
     }
 
     const dayNumber =
@@ -1183,49 +1187,60 @@ async function getWordsForToday(
             Date.now() / 86400000
         );
 
-    const poolSize =
+    const rotation =
+        dayNumber % pool.length;
+
+    const rotated = [
+        ...pool.slice(rotation),
+        ...pool.slice(0, rotation)
+    ];
+
+    const easy =
+        rotated[0];
+
+    const medium =
+        rotated[
         Math.min(
-            15,
-            candidates.length
-        );
+            4,
+            rotated.length - 1
+        )
+        ];
 
-    const startIndex =
-        (
-            dayNumber * count
-        ) %
-        poolSize;
+    const challenging =
+        rotated[
+        Math.min(
+            9,
+            rotated.length - 1
+        )
+        ];
 
-    const selected = [];
+    const selected = [
+        easy,
+        medium,
+        challenging
+    ];
 
-    for (
-        let offset = 0;
-        offset < poolSize &&
-        selected.length < count;
-        offset++
-    ) {
-        const candidate =
-            candidates[
-            (
-                startIndex +
-                offset
-            ) %
-            poolSize
-            ];
+    const unique = [];
 
-        if (
-            !selected.some(
-                (word) =>
-                    word.word ===
-                    candidate.word
-            )
-        ) {
-            selected.push(
-                candidate
-            );
+    selected.forEach(
+        (word) => {
+            if (
+                word &&
+                !unique.some(
+                    (item) =>
+                        item.word ===
+                        word.word
+                )
+            ) {
+                unique.push(word);
+            }
         }
-    }
+    );
 
-    return selected;
+    return unique.slice(
+        0,
+        count
+    );
 }
 
 async function discoverWord(
