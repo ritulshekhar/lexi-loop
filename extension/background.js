@@ -1,28 +1,47 @@
 const DAILY_ALARM = "lexiloop-daily-check";
-const DAILY_NOTIFICATION_COOLDOWN = 24 * 60 * 60 * 1000;
+const EXPLAIN_MENU_ID =
+    "lexiloop-explain-selection";
 
-function getLocalDateKey(date = new Date()) {
-    const year = date.getFullYear();
+const DAILY_NOTIFICATION_COOLDOWN =
+    24 * 60 * 60 * 1000;
 
-    const month = String(
-        date.getMonth() + 1
-    ).padStart(2, "0");
+function getLocalDateKey(
+    date = new Date()
+) {
+    const year =
+        date.getFullYear();
 
-    const day = String(
-        date.getDate()
-    ).padStart(2, "0");
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
 }
 
 function getNextNineAM() {
-    const now = new Date();
-    const next = new Date();
+    const now =
+        new Date();
 
-    next.setHours(9, 0, 0, 0);
+    const next =
+        new Date();
+
+    next.setHours(
+        9,
+        0,
+        0,
+        0
+    );
 
     if (next <= now) {
-        next.setDate(next.getDate() + 1);
+        next.setDate(
+            next.getDate() + 1
+        );
     }
 
     return next.getTime();
@@ -30,14 +49,19 @@ function getNextNineAM() {
 
 async function ensureDailyAlarm() {
     const alarm =
-        await chrome.alarms.get(DAILY_ALARM);
+        await chrome.alarms.get(
+            DAILY_ALARM
+        );
 
     if (!alarm) {
         await chrome.alarms.create(
             DAILY_ALARM,
             {
-                when: getNextNineAM(),
-                periodInMinutes: 24 * 60
+                when:
+                    getNextNineAM(),
+
+                periodInMinutes:
+                    24 * 60
             }
         );
     }
@@ -55,36 +79,37 @@ async function getDueWordCount() {
     const today =
         getLocalDateKey();
 
-    return Object.values(progress)
-        .filter(
-            (item) =>
-                item &&
-                item.dueDate &&
-                item.dueDate <= today
-        )
-        .length;
+    return Object.values(
+        progress
+    ).filter(
+        (item) =>
+            item &&
+            item.dueDate &&
+            item.dueDate <= today
+    ).length;
 }
 
 async function sendDailyNotification() {
     const today =
         getLocalDateKey();
 
-    const result =
+    const state =
         await chrome.storage.local.get([
             "lastNotificationDate",
             "lastStartupNotificationTime"
         ]);
 
     if (
-        result.lastNotificationDate === today
+        state.lastNotificationDate ===
+        today
     ) {
         return;
     }
 
     if (
-        result.lastStartupNotificationTime &&
+        state.lastStartupNotificationTime &&
         Date.now() -
-        result.lastStartupNotificationTime <
+        state.lastStartupNotificationTime <
         DAILY_NOTIFICATION_COOLDOWN
     ) {
         return;
@@ -98,7 +123,13 @@ async function sendDailyNotification() {
 
     if (dueCount > 0) {
         message +=
-            ` ${dueCount} word${dueCount === 1 ? "" : "s"} also need${dueCount === 1 ? "s" : ""} revision.`;
+            ` ${dueCount} word${dueCount === 1
+                ? ""
+                : "s"
+            } ${dueCount === 1
+                ? "needs"
+                : "need"
+            } revision.`;
     }
 
     try {
@@ -114,8 +145,11 @@ async function sendDailyNotification() {
         );
 
         await chrome.storage.local.set({
-            lastNotificationDate: today,
-            lastStartupNotificationTime: Date.now()
+            lastNotificationDate:
+                today,
+
+            lastStartupNotificationTime:
+                Date.now()
         });
     } catch (error) {
         console.error(
@@ -125,9 +159,28 @@ async function sendDailyNotification() {
     }
 }
 
+function createContextMenu() {
+    chrome.contextMenus.removeAll(
+        () => {
+            chrome.contextMenus.create({
+                id:
+                    EXPLAIN_MENU_ID,
+
+                title:
+                    "Explain with LexiLoop",
+
+                contexts: [
+                    "selection"
+                ]
+            });
+        }
+    );
+}
+
 chrome.runtime.onInstalled.addListener(
     async () => {
         await ensureDailyAlarm();
+        createContextMenu();
     }
 );
 
@@ -135,13 +188,57 @@ chrome.runtime.onStartup.addListener(
     async () => {
         await ensureDailyAlarm();
         await sendDailyNotification();
+        createContextMenu();
+    }
+);
+
+chrome.contextMenus.onClicked.addListener(
+    async (
+        info,
+        tab
+    ) => {
+        if (
+            info.menuItemId !==
+            EXPLAIN_MENU_ID
+        ) {
+            return;
+        }
+
+        const selectedText =
+            info.selectionText?.trim();
+
+        if (
+            !selectedText ||
+            !tab?.id
+        ) {
+            return;
+        }
+
+        try {
+            await chrome.tabs.sendMessage(
+                tab.id,
+                {
+                    type:
+                        "EXPLAIN_SELECTION",
+
+                    text:
+                        selectedText
+                }
+            );
+        } catch (error) {
+            console.warn(
+                "Could not send selection to page:",
+                error
+            );
+        }
     }
 );
 
 chrome.alarms.onAlarm.addListener(
     async (alarm) => {
         if (
-            alarm.name !== DAILY_ALARM
+            alarm.name !==
+            DAILY_ALARM
         ) {
             return;
         }

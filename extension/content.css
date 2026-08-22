@@ -178,3 +178,147 @@
     color:
         #555 !important;
 }
+
+#lexiloop-selection-card {
+    position: fixed !important;
+
+    right: 22px !important;
+    bottom: 22px !important;
+
+    z-index: 2147483647 !important;
+
+    width: 330px !important;
+
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif !important;
+}
+
+.lexiloop-selection-inner {
+    padding: 17px !important;
+
+    border:
+        1px solid #deded8 !important;
+
+    border-radius: 16px !important;
+
+    background:
+        #ffffff !important;
+
+    color:
+        #242424 !important;
+
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.14) !important;
+}
+
+.lexiloop-selection-top {
+    display: flex !important;
+
+    justify-content:
+        space-between !important;
+
+    align-items:
+        flex-start !important;
+}
+
+.lexiloop-selection-brand {
+    font-size: 15px !important;
+
+    font-weight: 700 !important;
+}
+
+.lexiloop-selection-label {
+    margin-top: 2px !important;
+
+    font-size: 8px !important;
+
+    font-weight: 700 !important;
+
+    letter-spacing: 1px !important;
+
+    color:
+        #94948c !important;
+}
+
+.lexiloop-selection-close {
+    width: 27px !important;
+    height: 27px !important;
+
+    padding: 0 !important;
+
+    border: 0 !important;
+
+    border-radius: 50% !important;
+
+    background:
+        #f0f0eb !important;
+
+    color:
+        #666 !important;
+
+    font-size: 18px !important;
+
+    cursor: pointer !important;
+}
+
+.lexiloop-selection-word {
+    margin-top: 17px !important;
+
+    font-size: 23px !important;
+
+    font-weight: 700 !important;
+
+    letter-spacing:
+        -0.4px !important;
+}
+
+.lexiloop-selection-meaning {
+    margin-top: 9px !important;
+
+    font-size: 12px !important;
+
+    line-height: 1.5 !important;
+
+    color:
+        #444 !important;
+}
+
+.lexiloop-selection-detail {
+    margin-top: 7px !important;
+
+    font-size: 10px !important;
+
+    color:
+        #777 !important;
+}
+
+.lexiloop-selection-example {
+    margin-top: 11px !important;
+
+    padding-top: 10px !important;
+
+    border-top:
+        1px solid #e7e7e1 !important;
+
+    font-size: 10px !important;
+
+    line-height: 1.5 !important;
+
+    color:
+        #666 !important;
+}
+
+.lexiloop-selection-loading {
+    margin-top: 13px !important;
+
+    font-size: 12px !important;
+
+    line-height: 1.5 !important;
+
+    color:
+        #666 !important;
+}
